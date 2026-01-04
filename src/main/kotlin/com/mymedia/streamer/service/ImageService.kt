@@ -1,6 +1,10 @@
 package com.mymedia.streamer.service
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import com.mymedia.streamer.dto.ImageCollectionResponse
+import com.mymedia.streamer.dto.ImageDetailsResponse
+import com.mymedia.streamer.dto.metadata.ImageMetadata
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import java.io.File
@@ -14,7 +18,6 @@ class ImageService(
 ) {
     private val imageExtensions = setOf("jpg", "jpeg", "png", "gif", "webp", "svg")
     private val imagesDir: File get() = File(storagePath, "images")
-
     /**
      * 이미지 컬렉션(폴더) 목록을 조회한다.
      */
@@ -23,16 +26,22 @@ class ImageService(
 
         return imagesDir.listFiles()
             ?.filter { it.isDirectory }
-            ?.map { folder ->
-                val imageFiles = countImageFiles(folder)
+            ?.mapNotNull { folder ->
+                val fileCount = countImageFiles(folder)
+                if (fileCount == 0) return@mapNotNull null
+
+                val thumbnailUrl = getThumbnailUrl(folder.name, folder) ?: return@mapNotNull null
+                val metadata = loadMetadata(folder)
+
                 ImageCollectionResponse(
                     id = folder.name,
                     name = folder.name,
-                    thumbnailUrl = "/api/images/${folder.name}/thumbnail",
-                    fileCount = imageFiles
+                    title = metadata?.title ?: folder.name,
+                    artist = metadata?.artist ?: "",
+                    tags = metadata?.tags ?: emptyList(),
+                    thumbnailUrl = thumbnailUrl
                 )
             }
-            ?.filter { it.fileCount > 0 }  // 이미지가 있는 폴더만
             ?: emptyList()
     }
 
@@ -40,10 +49,7 @@ class ImageService(
      * 컬렉션의 썸네일 이미지 파일을 반환한다.
      * 우선순위: thumbnail.* > 첫 번째 이미지
      */
-    fun getThumbnailFile(collectionId: String): File? {
-        val collectionDir = File(imagesDir, collectionId)
-        if (!collectionDir.exists() || !collectionDir.isDirectory) return null
-
+    private fun getThumbnailFile(collectionDir: File): File? {
         // 1. thumbnail.* 파일 찾기
         val thumbnailFile = collectionDir.listFiles()
             ?.find { it.isFile && it.nameWithoutExtension.lowercase() == "thumbnail"
@@ -58,6 +64,14 @@ class ImageService(
     }
 
     /**
+     * 컬렉션의 썸네일 URL을 반환한다.
+     */
+    private fun getThumbnailUrl(collectionId: String, collectionDir: File): String? {
+        val thumbnailFile = getThumbnailFile(collectionDir) ?: return null
+        return "/storage/images/$collectionId/${thumbnailFile.name}"
+    }
+
+    /**
      * 폴더 내 이미지 파일 개수를 재귀적으로 카운트한다.
      */
     private fun countImageFiles(directory: File): Int {
@@ -68,5 +82,56 @@ class ImageService(
 
     private fun ensureDirectoryExists() {
         if (!imagesDir.exists()) imagesDir.mkdirs()
+    }
+
+    private val objectMapper = jacksonObjectMapper()
+
+    /**
+     * 이미지 컬렉션 상세 정보를 조회한다.
+     */
+    fun getCollectionDetails(collectionId: String): ImageDetailsResponse? {
+        val collectionDir = File(imagesDir, collectionId)
+        if (!collectionDir.exists() || !collectionDir.isDirectory) return null
+
+        val metadata = loadMetadata(collectionDir)
+        val imageFiles = getImageFiles(collectionDir)
+        val imageUrls = imageFiles.map { "/storage/images/$collectionId/${it.name}" }
+        val thumbnailUrl = getThumbnailUrl(collectionId, collectionDir) ?: return null
+
+        return ImageDetailsResponse(
+            id = collectionId,
+            name = collectionId,
+            title = metadata?.title ?: collectionId,
+            artist = metadata?.artist ?: "",
+            tags = metadata?.tags ?: emptyList(),
+            description = metadata?.description ?: "",
+            thumbnailUrl = thumbnailUrl,
+            fileCount = imageFiles.size,
+            images = imageUrls
+        )
+    }
+
+    /**
+     * 폴더 내 이미지 파일 목록을 반환한다.
+     */
+    private fun getImageFiles(directory: File): List<File> {
+        return directory.walkTopDown()
+            .filter { it.isFile && it.extension.lowercase() in imageExtensions }
+            .sortedBy { it.name }
+            .toList()
+    }
+
+    /**
+     * 컬렉션 폴더에서 metadata.json을 읽어온다.
+     */
+    private fun loadMetadata(collectionDir: File): ImageMetadata? {
+        val metadataFile = File(collectionDir, "metadata.json")
+        if (!metadataFile.exists()) return null
+
+        return try {
+            objectMapper.readValue<ImageMetadata>(metadataFile)
+        } catch (e: Exception) {
+            null
+        }
     }
 }
