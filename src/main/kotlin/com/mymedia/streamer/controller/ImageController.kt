@@ -2,12 +2,20 @@ package com.mymedia.streamer.controller
 
 import com.mymedia.streamer.dto.ImageCollectionResponse
 import com.mymedia.streamer.dto.ImageDetailsResponse
+import com.mymedia.streamer.dto.ImageUploadRequest
+import com.mymedia.streamer.dto.ImageUploadResponse
 import com.mymedia.streamer.service.ImageService
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestPart
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.multipart.MultipartFile
+import java.awt.Image
 
 /**
  * 이미지 컬렉션 API 컨트롤러
@@ -34,5 +42,15 @@ class ImageController(
             ?: return ResponseEntity.notFound().build()
 
         return ResponseEntity.ok(details)
+    }
+
+    @PostMapping(consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
+    fun createCollection(
+        @RequestPart("metadata") request: ImageUploadRequest,
+        @RequestPart("images") images: List<MultipartFile>,
+        @RequestPart("thumbnail", required = false) thumbnail: MultipartFile?
+    ): ResponseEntity<ImageUploadResponse> {
+        val result = imageService.createCollection(request, images, thumbnail)
+        return ResponseEntity.ok(result)
     }
 }
