@@ -2,12 +2,13 @@ package com.mymedia.streamer.controller
 
 import com.mymedia.streamer.dto.ImageCollectionResponse
 import com.mymedia.streamer.dto.ImageDetailsResponse
-import com.mymedia.streamer.dto.ImageUploadRequest
+import com.mymedia.streamer.dto.ImageUploadDto
 import com.mymedia.streamer.dto.ImageUploadResponse
 import com.mymedia.streamer.service.ImageService
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -46,11 +47,10 @@ class ImageController(
 
     @PostMapping(consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     fun createCollection(
-        @RequestPart("metadata") request: ImageUploadRequest,
-        @RequestPart("images") images: List<MultipartFile>,
-        @RequestPart("thumbnail", required = false) thumbnail: MultipartFile?
+        @ModelAttribute requestDto: ImageUploadDto
     ): ResponseEntity<ImageUploadResponse> {
-        val result = imageService.createCollection(request, images, thumbnail)
+        // Service에 DTO 전체를 넘깁니다.
+        val result = imageService.createCollection(requestDto)
         return ResponseEntity.ok(result)
     }
 }

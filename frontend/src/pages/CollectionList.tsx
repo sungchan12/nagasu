@@ -8,9 +8,10 @@ const API_BASE = 'http://localhost:8080';
 
 type Props = {
   onSelectCollection: (id: string) => void;
+  onUploadClick: () => void;
 };
 
-export function CollectionList({ onSelectCollection }: Props) {
+export function CollectionList({ onSelectCollection, onUploadClick }: Props) {
   const [collections, setCollections] = useState<ImageCollection[]>([]);
   const [filteredCollections, setFilteredCollections] = useState<ImageCollection[]>([]);
   const [loading, setLoading] = useState(true);
@@ -60,7 +61,12 @@ export function CollectionList({ onSelectCollection }: Props) {
 
   return (
     <div className="collection-list-page">
-      <SearchBar onSearch={handleSearch} />
+      <div className="list-header">
+        <SearchBar onSearch={handleSearch} />
+        <button className="upload-button" onClick={onUploadClick}>
+          + Upload
+        </button>
+      </div>
       <div className="collection-list">
         {filteredCollections.map((collection) => (
           <CollectionCard

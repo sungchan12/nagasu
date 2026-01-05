@@ -4,6 +4,32 @@
   padding: 24px;
 }
 
+.list-header {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.list-header .search-bar {
+  flex: 1;
+}
+
+.upload-button {
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.upload-button:hover {
+  background-color: #0056b3;
+}
+
 .collection-list {
   display: flex;
   flex-direction: column;

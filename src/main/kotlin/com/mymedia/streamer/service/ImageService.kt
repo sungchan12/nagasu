@@ -4,9 +4,12 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.mymedia.streamer.dto.ImageCollectionResponse
 import com.mymedia.streamer.dto.ImageDetailsResponse
+import com.mymedia.streamer.dto.ImageUploadDto
+import com.mymedia.streamer.dto.ImageUploadResponse
 import com.mymedia.streamer.dto.metadata.ImageMetadata
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
+import org.springframework.web.multipart.MultipartFile
 import java.io.File
 
 /**
@@ -133,5 +136,63 @@ class ImageService(
         } catch (e: Exception) {
             null
         }
+    }
+
+    fun createCollection(request: ImageUploadDto): ImageUploadResponse {
+        return try {
+            ensureDirectoryExists()
+            val collectionId = toSlug(request.title)
+            val collectionDir = File(imagesDir, collectionId)
+
+            if (!collectionDir.exists()) {
+                collectionDir.mkdirs()
+            }
+
+            // 이미지 리스트 저장
+            request.images.forEachIndexed { index, file ->
+                if (!file.isEmpty) {
+                    val extension = file.originalFilename?.substringAfterLast('.') ?: "jpg"
+                    val fileName = String.format("%03d.%s", index + 1, extension)
+                    val targetFile = File(collectionDir, fileName)
+                    file.transferTo(targetFile)
+                }
+            }
+
+            // 썸네일 저장
+            request.thumbnail?.let { file ->
+                if (!file.isEmpty) {
+                    val extension = file.originalFilename?.substringAfterLast('.') ?: "jpg"
+                    val thumbnailFile = File(collectionDir, "thumbnail.$extension")
+                    file.transferTo(thumbnailFile)
+                }
+            }
+
+            // metadata.json 저장
+            val metadata = ImageMetadata(
+                title = request.title,
+                artist = request.artist,
+                tags = request.tags,
+                description = request.description ?: ""
+            )
+            val metadataFile = File(collectionDir, "metadata.json")
+            objectMapper.writeValue(metadataFile, metadata)
+
+            ImageUploadResponse(
+                message = "컬렉션이 생성되었습니다. ID: $collectionId",
+                status = true
+            )
+        } catch (e: Exception) {
+            ImageUploadResponse(
+                message = "컬렉션 생성 실패: ${e.message}",
+                status = false
+            )
+        }
+    }
+
+    private fun toSlug(title: String): String {
+        return title
+            .trim()
+            .replace(Regex("\\s+"), "_")
+            .replace(Regex("[^a-zA-Z0-9가-힣_-]"), "")
     }
 }
