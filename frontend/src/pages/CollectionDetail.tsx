@@ -14,6 +14,8 @@ export function CollectionDetail({ collectionId, onBack }: Props) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [viewerIndex, setViewerIndex] = useState<number | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     fetchDetails();
@@ -45,6 +47,24 @@ export function CollectionDetail({ collectionId, onBack }: Props) {
       setError(err instanceof Error ? err.message : 'Unknown error');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    try {
+      setDeleting(true);
+      const response = await fetch(`${API_BASE}/api/images/${collectionId}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) throw new Error('Failed to delete collection');
+
+      onBack();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unknown error');
+      setShowDeleteConfirm(false);
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -80,6 +100,9 @@ export function CollectionDetail({ collectionId, onBack }: Props) {
             <p className="detail-description">{details.description}</p>
           )}
           <p className="detail-count">{details.fileCount} images</p>
+          <button className="delete-button" onClick={() => setShowDeleteConfirm(true)}>
+            Delete Collection
+          </button>
         </div>
       </div>
 
@@ -125,6 +148,32 @@ export function CollectionDetail({ collectionId, onBack }: Props) {
             </button>
             <div className="viewer-counter">
               {viewerIndex + 1} / {details.images.length}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showDeleteConfirm && (
+        <div className="delete-confirm-overlay" onClick={() => setShowDeleteConfirm(false)}>
+          <div className="delete-confirm-dialog" onClick={(e) => e.stopPropagation()}>
+            <h2>Delete Collection?</h2>
+            <p>Are you sure you want to delete "{details.title}"?</p>
+            <p className="warning">This action cannot be undone.</p>
+            <div className="dialog-buttons">
+              <button
+                className="cancel-button"
+                onClick={() => setShowDeleteConfirm(false)}
+                disabled={deleting}
+              >
+                Cancel
+              </button>
+              <button
+                className="confirm-delete-button"
+                onClick={handleDelete}
+                disabled={deleting}
+              >
+                {deleting ? 'Deleting...' : 'Delete'}
+              </button>
             </div>
           </div>
         </div>
