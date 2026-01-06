@@ -188,6 +188,23 @@ class ImageService(
             )
         }
     }
+    /**
+     * 컬렉션을 삭제한다.
+     */
+    fun deleteCollection(collectionId: String): Boolean {
+        val collectionDir = File(imagesDir, collectionId)
+
+        if (!collectionDir.exists() || !collectionDir.isDirectory) {
+            return false
+        }
+
+        return try {
+            collectionDir.deleteRecursively()
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
 
     private fun toSlug(title: String): String {
         return title
