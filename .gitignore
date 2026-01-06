@@ -76,6 +76,7 @@ $RECYCLE.BIN/
 ### Spring Boot ###
 # 로컬 설정 파일
 application.yaml
+application.yml
 application.properties
 application-local.yml
 application-local.properties
