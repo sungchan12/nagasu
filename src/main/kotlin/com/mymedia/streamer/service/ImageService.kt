@@ -7,9 +7,10 @@ import com.mymedia.streamer.dto.ImageDetailsResponse
 import com.mymedia.streamer.dto.ImageUploadDto
 import com.mymedia.streamer.dto.ImageUploadResponse
 import com.mymedia.streamer.dto.metadata.ImageMetadata
+import com.mymedia.streamer.utils.toSlug
+import com.mymedia.streamer.utils.ensureExists
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
-import org.springframework.web.multipart.MultipartFile
 import java.io.File
 
 /**
@@ -21,11 +22,13 @@ class ImageService(
 ) {
     private val imageExtensions = setOf("jpg", "jpeg", "png", "gif", "webp", "svg")
     private val imagesDir: File get() = File(storagePath, "images")
+    private val objectMapper = jacksonObjectMapper()
+
     /**
      * 이미지 컬렉션(폴더) 목록을 조회한다.
      */
     fun getCollections(): List<ImageCollectionResponse> {
-        ensureDirectoryExists()
+        imagesDir.ensureExists()
 
         return imagesDir.listFiles()
             ?.filter { it.isDirectory }
@@ -78,17 +81,8 @@ class ImageService(
      * 폴더 내 이미지 파일 개수를 재귀적으로 카운트한다.
      */
     private fun countImageFiles(directory: File): Int {
-        return directory.walkTopDown()
-            .filter { it.isFile && it.extension.lowercase() in imageExtensions }
-            .count()
+        return directory.walkTopDown().count { it.isFile && it.extension.lowercase() in imageExtensions }
     }
-
-    private fun ensureDirectoryExists() {
-        if (!imagesDir.exists()) imagesDir.mkdirs()
-    }
-
-    private val objectMapper = jacksonObjectMapper()
-
     /**
      * 이미지 컬렉션 상세 정보를 조회한다.
      */
@@ -140,7 +134,7 @@ class ImageService(
 
     fun createCollection(request: ImageUploadDto): ImageUploadResponse {
         return try {
-            ensureDirectoryExists()
+            imagesDir.ensureExists()
             val collectionId = toSlug(request.title)
             val collectionDir = File(imagesDir, collectionId)
 
@@ -204,12 +198,5 @@ class ImageService(
         } catch (e: Exception) {
             false
         }
-    }
-
-    private fun toSlug(title: String): String {
-        return title
-            .trim()
-            .replace(Regex("\\s+"), "_")
-            .replace(Regex("[^a-zA-Z0-9가-힣_-]"), "")
     }
 }
