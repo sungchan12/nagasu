@@ -9,3 +9,21 @@ import java.io.File
 fun File.ensureExists(): Boolean {
     return this.exists() || this.mkdirs()
 }
+
+val IMAGE_EXTENSION = setOf("jpg", "jpeg", "png", "gif", "webp", "svg")
+fun File.isImageFile(): Boolean {
+    return this.isFile && this.extension.lowercase() in IMAGE_EXTENSION
+}
+
+val VIDEO_EXTENSIONS = setOf("mp4", "avi", "mkv", "mov", "webm")
+fun File.isVideoFile(): Boolean {
+    return this.isFile && this.extension.lowercase() in VIDEO_EXTENSIONS
+}
+
+fun File.countImageFiles(): Int {
+    return this.walkTopDown().count {it.isImageFile() }
+}
+
+fun File.countVideoFiles(): Int {
+    return this.walkTopDown().count {it.isVideoFile() }
+}

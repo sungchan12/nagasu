@@ -9,6 +9,9 @@ import com.mymedia.streamer.dto.ImageUploadResponse
 import com.mymedia.streamer.dto.metadata.ImageMetadata
 import com.mymedia.streamer.utils.toSlug
 import com.mymedia.streamer.utils.ensureExists
+import com.mymedia.streamer.repository.getCollectionDirs
+import com.mymedia.streamer.repository.getThumbnailImageFile
+import com.mymedia.streamer.repository.getImageFiles
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import java.io.File
@@ -30,12 +33,8 @@ class ImageService(
     fun getCollections(): List<ImageCollectionResponse> {
         imagesDir.ensureExists()
 
-        return imagesDir.listFiles()
-            ?.filter { it.isDirectory }
-            ?.mapNotNull { folder ->
-                val fileCount = countImageFiles(folder)
-                if (fileCount == 0) return@mapNotNull null
-
+        return imagesDir.getCollectionDirs()
+            .mapNotNull { folder ->
                 val thumbnailUrl = getThumbnailUrl(folder.name, folder) ?: return@mapNotNull null
                 val metadata = loadMetadata(folder)
 
@@ -48,7 +47,6 @@ class ImageService(
                     thumbnailUrl = thumbnailUrl
                 )
             }
-            ?: emptyList()
     }
 
     /**
