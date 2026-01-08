@@ -13,7 +13,6 @@ class VideoService(
     @Value("\${storage.path}") private val storagePath: String
 ) {
     private val videoExtensions = setOf("mp4", "avi", "mkv", "mov", "webm")
-    private val imageExtensions = setOf("jpg", "jpeg", "png", "gif", "webp")
     private val videosDir: File get() = File(storagePath, "videos")
 
     /**

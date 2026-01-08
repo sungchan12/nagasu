@@ -18,6 +18,19 @@ export function CollectionDetail({ collectionId, onBack }: Props) {
   const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
+    const fetchDetails = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`${API_BASE}/api/images/${collectionId}/details`);
+        if (!response.ok) throw new Error('Failed to fetch details');
+        const data = await response.json();
+        setDetails(data);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Unknown error');
+      } finally {
+        setLoading(false);
+      }
+    };
     fetchDetails();
   }, [collectionId]);
 
@@ -35,20 +48,6 @@ export function CollectionDetail({ collectionId, onBack }: Props) {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [viewerIndex, details]);
-
-  const fetchDetails = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch(`${API_BASE}/api/images/${collectionId}/details`);
-      if (!response.ok) throw new Error('Failed to fetch details');
-      const data = await response.json();
-      setDetails(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleDelete = async () => {
     try {
