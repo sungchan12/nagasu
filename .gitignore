@@ -80,5 +80,4 @@ application.yml
 application.properties
 application-local.yml
 application-local.properties
-frontend/package-lock.json
 frontend/node_modules
