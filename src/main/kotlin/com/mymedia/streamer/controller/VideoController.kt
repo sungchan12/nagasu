@@ -20,28 +20,8 @@ import java.nio.file.Files
 class VideoController(
     private val videoService: VideoService
 ) {
-    /**
-     * 비디오 컬렉션 목록을 조회한다.
-     */
     @GetMapping
-    fun getCollections(): List<VideoCollectionResponse> {
-        return videoService.getCollections()
-    }
-
-    /**
-     * 컬렉션의 썸네일 이미지를 반환한다.
-     */
-    @GetMapping("/{collectionId}/thumbnail")
-    fun getThumbnail(@PathVariable collectionId: String): ResponseEntity<Resource> {
-        val thumbnailFile = videoService.getThumbnailFile(collectionId)
-            ?: return ResponseEntity.notFound().build()
-
-        val resource = FileSystemResource(thumbnailFile)
-        val contentType = Files.probeContentType(thumbnailFile.toPath())
-            ?: "application/octet-stream"
-
-        return ResponseEntity.ok()
-            .contentType(MediaType.parseMediaType(contentType))
-            .body(resource)
+    fun getVideos(): List<VideoCollectionResponse> {
+        return videoService.getVideoCollection()
     }
 }
