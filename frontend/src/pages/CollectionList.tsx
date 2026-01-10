@@ -18,23 +18,23 @@ export function CollectionList({ onSelectCollection, onUploadClick }: Props) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    const fetchCollections = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`${API_BASE}/api/images`);
+        if (!response.ok) throw new Error('Failed to fetch collections');
+        const data = await response.json();
+        setCollections(data);
+        setFilteredCollections(data);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Unknown error');
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchCollections();
   }, []);
-
-  const fetchCollections = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch(`${API_BASE}/api/images`);
-      if (!response.ok) throw new Error('Failed to fetch collections');
-      const data = await response.json();
-      setCollections(data);
-      setFilteredCollections(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleSearch = (query: string) => {
     if (!query.trim()) {
