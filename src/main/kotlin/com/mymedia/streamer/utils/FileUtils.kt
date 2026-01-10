@@ -1,6 +1,11 @@
 package com.mymedia.streamer.utils
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
+import com.mymedia.streamer.dto.metadata.CollectionMetadata
 import java.io.File
+
+private val objectMapper = jacksonObjectMapper()
 
 /**
  * 디렉토리가 존재하지 않으면 생성한다.
@@ -26,4 +31,15 @@ fun File.countImageFiles(): Int {
 
 fun File.countVideoFiles(): Int {
     return this.walkTopDown().count {it.isVideoFile() }
+}
+
+fun File.getMetaData(): CollectionMetadata? {
+    val metadataFile = File(this, "metadata.json")
+    if (!metadataFile.exists()) return null
+    return objectMapper.readValue<CollectionMetadata>(metadataFile)
+}
+
+fun File.saveMetaData(metadata: CollectionMetadata) {
+    val metadataFile = File(this, "metadata.json")
+    objectMapper.writeValue(metadataFile, metadata)
 }
