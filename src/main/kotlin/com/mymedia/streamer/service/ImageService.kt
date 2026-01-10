@@ -4,14 +4,14 @@ import com.mymedia.streamer.dto.ImageCollectionResponse
 import com.mymedia.streamer.dto.ImageDetailsResponse
 import com.mymedia.streamer.dto.ImageUploadDto
 import com.mymedia.streamer.dto.ImageUploadResponse
-import com.mymedia.streamer.dto.metadata.ImageMetadata
+import com.mymedia.streamer.dto.metadata.CollectionMetadata
 import com.mymedia.streamer.utils.toSlug
 import com.mymedia.streamer.utils.ensureExists
+import com.mymedia.streamer.utils.getMetaData
+import com.mymedia.streamer.utils.saveMetaData
 import com.mymedia.streamer.repository.getCollectionDirs
 import com.mymedia.streamer.repository.getThumbnailFileName
 import com.mymedia.streamer.repository.getImageFileNames
-import com.mymedia.streamer.repository.getMetaData
-import com.mymedia.streamer.repository.saveMetaData
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import java.io.File
@@ -33,7 +33,7 @@ class ImageService(
 
         return imagesDir.getCollectionDirs()
             .mapNotNull { folder ->
-                val thumbnailUrl = getThumbnailUrl(folder.name, folder) ?: return@mapNotNull null
+                val thumbnailUrl = getThumbnailUrl(folder.name, folder)
                 val metadata = folder.getMetaData()
 
                 ImageCollectionResponse(
@@ -47,8 +47,8 @@ class ImageService(
             }
     }
 
-    private fun getThumbnailUrl(collectionId: String, collectionDir: File): String? {
-        val thumbnailName = collectionDir.getThumbnailFileName() ?: return null
+    private fun getThumbnailUrl(collectionId: String, collectionDir: File): String {
+        val thumbnailName = collectionDir.getThumbnailFileName()
         return "/storage/images/$collectionId/$thumbnailName"
     }
     /**
@@ -106,7 +106,7 @@ class ImageService(
             }
 
             // metadata.json 저장
-            val metadata = ImageMetadata(
+            val metadata = CollectionMetadata(
                 title = request.title,
                 artist = request.artist,
                 tags = request.tags,
