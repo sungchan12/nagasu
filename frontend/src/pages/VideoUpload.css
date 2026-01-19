@@ -1,0 +1,105 @@
+.video-upload-page {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.video-upload-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.video-upload-header h1 {
+  margin: 0;
+  font-size: 24px;
+}
+
+.video-upload-page .back-button {
+  background: none;
+  border: 1px solid #ddd;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.video-upload-page .back-button:hover {
+  background-color: #f5f5f5;
+}
+
+.video-upload-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.video-upload-form .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.video-upload-form .form-group label {
+  font-weight: 500;
+  font-size: 14px;
+  color: #333;
+}
+
+.video-upload-form .form-group input[type="text"],
+.video-upload-form .form-group textarea {
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  font-family: inherit;
+}
+
+.video-upload-form .form-group input[type="text"]:focus,
+.video-upload-form .form-group textarea:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+.video-upload-form .form-group input[type="file"] {
+  padding: 8px 0;
+}
+
+.video-upload-form .file-info {
+  font-size: 12px;
+  color: #666;
+}
+
+.video-upload-form .file-hint {
+  font-size: 12px;
+  color: #888;
+  font-style: italic;
+}
+
+.video-upload-form .error-message {
+  color: #d32f2f;
+  font-size: 14px;
+  padding: 12px;
+  background-color: #ffebee;
+  border-radius: 4px;
+}
+
+.video-upload-form .submit-button {
+  padding: 14px 24px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.video-upload-form .submit-button:hover:not(:disabled) {
+  background-color: #0056b3;
+}
+
+.video-upload-form .submit-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
