@@ -33,9 +33,9 @@ fun File.countVideoFiles(): Int {
     return this.walkTopDown().count { it.isVideoFile() }
 }
 
-fun File.getMetaData(): CollectionMetadata? {
+fun File.getMetaData(): CollectionMetadata {
     val metadataFile = File(this, "metadata.json")
-    if (!metadataFile.exists()) return null
+    require(metadataFile.exists()) { "metadata file does not exist." }
     return objectMapper.readValue<CollectionMetadata>(metadataFile)
 }
 
