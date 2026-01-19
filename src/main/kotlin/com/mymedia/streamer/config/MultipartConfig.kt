@@ -12,8 +12,8 @@ class MultipartConfig {
     @Bean
     fun multipartConfigElement(): MultipartConfigElement {
         val factory = MultipartConfigFactory()
-        factory.setMaxFileSize(DataSize.ofMegabytes(100))
-        factory.setMaxRequestSize(DataSize.ofGigabytes(1))
+        factory.setMaxFileSize(DataSize.ofGigabytes(2))
+        factory.setMaxRequestSize(DataSize.ofGigabytes(2))
         return factory.createMultipartConfig()
     }
 }
