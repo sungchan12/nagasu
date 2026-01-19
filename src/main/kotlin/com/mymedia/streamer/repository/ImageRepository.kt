@@ -3,8 +3,8 @@ package com.mymedia.streamer.repository
 import com.mymedia.streamer.utils.isImageFile
 import java.io.File
 
-fun File.getCollectionDirs(): List<File> {
-    return this.listFiles()?.filter { it.isDirectory } ?: emptyList()
+fun File.getCollectionDirs(): List<String> {
+    return this.listFiles()?.filter { it.isDirectory }?.map { it.name } ?: emptyList()
 }
 
 fun File.getImageFileNames(): List<String> {
