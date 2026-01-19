@@ -32,14 +32,15 @@ class ImageService(
         imagesDir.ensureExists()
 
         return imagesDir.getCollectionDirs()
-            .mapNotNull { folder ->
-                val thumbnailUrl = getThumbnailUrl(folder.name, folder)
+            .map { folderName ->
+                val folder = File(imagesDir, folderName)
+                val thumbnailUrl = getThumbnailUrl(folderName, folder)
                 val metadata = folder.getMetaData()
 
                 ImageCollectionResponse(
-                    id = folder.name,
-                    name = folder.name,
-                    title = metadata?.title ?: folder.name,
+                    id = folderName,
+                    name = folderName,
+                    title = metadata?.title ?: folderName,
                     artist = metadata?.artist ?: "",
                     tags = metadata?.tags ?: emptyList(),
                     thumbnailUrl = thumbnailUrl
@@ -61,7 +62,7 @@ class ImageService(
         val metadata = collectionDir.getMetaData()
         val imageNames = collectionDir.getImageFileNames()
         val imageUrls = imageNames.map { "/storage/images/$collectionId/$it" }
-        val thumbnailUrl = getThumbnailUrl(collectionId, collectionDir) ?: return null
+        val thumbnailUrl = getThumbnailUrl(collectionId, collectionDir)
 
         return ImageDetailsResponse(
             id = collectionId,
@@ -71,7 +72,6 @@ class ImageService(
             tags = metadata?.tags ?: emptyList(),
             description = metadata?.description ?: "",
             thumbnailUrl = thumbnailUrl,
-            fileCount = imageNames.size,
             images = imageUrls
         )
     }
@@ -130,11 +130,9 @@ class ImageService(
      */
     fun deleteCollection(collectionId: String): Boolean {
         val collectionDir = File(imagesDir, collectionId)
-
         if (!collectionDir.exists() || !collectionDir.isDirectory) {
             return false
         }
-
         return try {
             collectionDir.deleteRecursively()
             true
