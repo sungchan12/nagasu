@@ -8,6 +8,5 @@ data class ImageDetailsResponse(
     val tags: List<String>,
     val description: String,
     val thumbnailUrl: String,
-    val fileCount: Int,
     val images: List<String>
 )
