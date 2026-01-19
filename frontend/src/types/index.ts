@@ -18,3 +18,22 @@ export type ImageDetails = {
   fileCount: number;
   images: string[];
 };
+
+export type VideoCollection = {
+  id: string;
+  title: string;
+  artist: string;
+  tags: string[];
+  thumbnailUrl: string;
+};
+
+export type VideoDetails = {
+  id: string;
+  name: string;
+  title: string;
+  artist: string;
+  tags: string[];
+  description: string;
+  thumbnailUrl: string;
+  videoUrl: string;
+};
