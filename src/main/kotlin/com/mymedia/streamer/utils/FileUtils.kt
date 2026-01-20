@@ -25,6 +25,11 @@ fun File.isVideoFile(): Boolean {
     return this.isFile && this.extension.lowercase() in VIDEO_EXTENSIONS
 }
 
+val SUBTITLE_EXTENSIONS = setOf("vtt", "srt")
+fun File.isSubtitleFile(): Boolean {
+    return this.isFile && this.extension.lowercase() in SUBTITLE_EXTENSIONS
+}
+
 fun File.countImageFiles(): Int {
     return this.walkTopDown().count { it.isImageFile() }
 }
