@@ -15,11 +15,13 @@ export function VideoUpload({ onBack, onSuccess }: Props) {
   const [description, setDescription] = useState('');
   const [video, setVideo] = useState<File | null>(null);
   const [thumbnail, setThumbnail] = useState<File | null>(null);
+  const [subtitle, setSubtitle] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const videoInputRef = useRef<HTMLInputElement>(null);
   const thumbnailInputRef = useRef<HTMLInputElement>(null);
+  const subtitleInputRef = useRef<HTMLInputElement>(null);
 
   const handleVideoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -30,6 +32,12 @@ export function VideoUpload({ onBack, onSuccess }: Props) {
   const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setThumbnail(e.target.files[0]);
+    }
+  };
+
+  const handleSubtitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setSubtitle(e.target.files[0]);
     }
   };
 
@@ -64,6 +72,10 @@ export function VideoUpload({ onBack, onSuccess }: Props) {
 
       if (thumbnail) {
         formData.append('thumbnail', thumbnail);
+      }
+
+      if (subtitle) {
+        formData.append('subtitle', subtitle);
       }
 
       const response = await fetch(`${API_BASE}/api/videos`, {
@@ -163,6 +175,20 @@ export function VideoUpload({ onBack, onSuccess }: Props) {
           <div className="file-hint">썸네일을 선택하지 않으면 자동 생성됩니다</div>
           {thumbnail && (
             <div className="file-info">{thumbnail.name}</div>
+          )}
+        </div>
+
+        <div className="form-group">
+          <label>Subtitle (optional)</label>
+          <input
+            ref={subtitleInputRef}
+            type="file"
+            accept=".srt,.vtt"
+            onChange={handleSubtitleChange}
+          />
+          <div className="file-hint">자막 파일 (.srt, .vtt)</div>
+          {subtitle && (
+            <div className="file-info">{subtitle.name}</div>
           )}
         </div>
 
