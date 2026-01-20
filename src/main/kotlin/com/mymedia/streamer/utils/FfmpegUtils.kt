@@ -16,8 +16,8 @@ fun extractThumbnail(videoFile: File, outputFile: File, timeSeconds: Int = 1): B
     val command = listOf(
         "ffmpeg",
         "-y",                          // 덮어쓰기
-        "-i", videoFile.absolutePath,  // 입력 파일
         "-ss", timeSeconds.toString(), // 시간 위치
+        "-i", videoFile.absolutePath,  // 입력 파일
         "-vframes", "1",               // 1프레임만
         "-q:v", "2",                   // 품질 (2가 높은 품질)
         outputFile.absolutePath        // 출력 파일
@@ -27,7 +27,6 @@ fun extractThumbnail(videoFile: File, outputFile: File, timeSeconds: Int = 1): B
         val process = ProcessBuilder(command)
             .redirectErrorStream(true)
             .start()
-
         val completed = process.waitFor(30, TimeUnit.SECONDS)
         completed && process.exitValue() == 0
     } catch (e: Exception) {
