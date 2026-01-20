@@ -5,6 +5,7 @@ import com.mymedia.streamer.dto.VideoDetailsResponse
 import com.mymedia.streamer.dto.VideoUploadRequestDto
 import com.mymedia.streamer.dto.VideoUploadResponseDto
 import com.mymedia.streamer.dto.metadata.CollectionMetadata
+import com.mymedia.streamer.repository.getSubtitleFileName
 import com.mymedia.streamer.repository.getThumbnailFileName
 import com.mymedia.streamer.repository.getVideoCollection
 import com.mymedia.streamer.repository.getVideoFileName
@@ -48,7 +49,7 @@ class VideoService(
         val metadata = videoColDir.getMetaData()
         val thumbnailUrl = getThumbnailUrl(videoColDir) ?: return null
         val videoUrl = getVideoUrl(videoColDir) ?: return null
-
+        val videoSubtitleUrl = getVideoSubtitle(videoColDir) ?: return null
         return VideoDetailsResponse(
             id = collectionId,
             name = videoColDir.name,
@@ -57,7 +58,8 @@ class VideoService(
             tags = metadata.tags,
             description = metadata.description,
             thumbnailUrl = thumbnailUrl,
-            videoUrl = videoUrl
+            videoUrl = videoUrl,
+            videoSubtitleUrl = videoSubtitleUrl
         )
     }
 
@@ -69,6 +71,11 @@ class VideoService(
     private fun getVideoUrl(collectionDir: File): String? {
         val videoFileName = collectionDir.getVideoFileName() ?: return null
         return "/storage/videos/${collectionDir.name}/$videoFileName"
+    }
+
+    private fun getVideoSubtitle(collectionDir: File): String? {
+        val videoSubtitle = collectionDir.getSubtitleFileName()
+        return "/storage/videos/${collectionDir.name}/$videoSubtitle"
     }
 
     fun uploadVideoCollection(videoUploadRequestDto: VideoUploadRequestDto): VideoUploadResponseDto {
@@ -94,7 +101,15 @@ class VideoService(
                 // FFmpeg으로 비디오에서 썸네일 자동 생성
                 extractThumbnailToFolder(videoFile)
             }
-
+            // 자막 저장
+            val subtitleInput = videoUploadRequestDto.subtitle
+            if (subtitleInput != null && !subtitleInput.isEmpty) {
+                val videoBaseName = videoUploadRequestDto.video.originalFilename?.substringBeforeLast('.') ?: "video"
+                val subtitleExtension = subtitleInput.originalFilename?.substringAfterLast('.', "srt") ?: "srt"
+                val subtitleFileName = "$videoBaseName.$subtitleExtension"
+                val subtitleFile = File(collectionDir, subtitleFileName)
+                subtitleInput.transferTo(subtitleFile)
+            }
             // 메타데이터 저장
             val metadata = CollectionMetadata(
                 title = videoUploadRequestDto.title,
