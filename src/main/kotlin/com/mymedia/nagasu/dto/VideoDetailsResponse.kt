@@ -1,6 +1,6 @@
-package com.mymedia.streamer.dto
+package com.mymedia.nagasu.dto
 
-data class ImageDetailsResponse(
+data class VideoDetailsResponse(
     val id: String,
     val name: String,
     val title: String,
@@ -8,5 +8,6 @@ data class ImageDetailsResponse(
     val tags: List<String>,
     val description: String,
     val thumbnailUrl: String,
-    val images: List<String>
+    val videoUrl: String,
+    val videoSubtitleUrl: String
 )

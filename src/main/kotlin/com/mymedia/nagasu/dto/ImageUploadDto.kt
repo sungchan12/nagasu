@@ -1,4 +1,4 @@
-package com.mymedia.streamer.dto
+package com.mymedia.nagasu.dto
 
 import org.springframework.web.multipart.MultipartFile
 

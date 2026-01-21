@@ -1,6 +1,6 @@
-package com.mymedia.streamer.repository
+package com.mymedia.nagasu.repository
 
-import com.mymedia.streamer.utils.isImageFile
+import com.mymedia.nagasu.utils.isImageFile
 import java.io.File
 
 fun File.getCollectionDirs(): List<String> {

@@ -1,4 +1,4 @@
-package com.mymedia.streamer.dto
+package com.mymedia.nagasu.dto
 
 /**
  * 이미지 컬렉션(폴더) 정보를 반환하는 응답 DTO

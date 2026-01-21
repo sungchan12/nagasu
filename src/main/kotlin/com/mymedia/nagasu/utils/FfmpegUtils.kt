@@ -1,4 +1,4 @@
-package com.mymedia.streamer.utils
+package com.mymedia.nagasu.utils
 
 import java.io.File
 import java.util.concurrent.TimeUnit

@@ -1,4 +1,4 @@
-package com.mymedia.streamer.dto.metadata
+package com.mymedia.nagasu.dto.metadata
 
 /**
  * metadata.json 파싱용 데이터 클래스

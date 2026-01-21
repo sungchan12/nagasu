@@ -1,4 +1,4 @@
-package com.mymedia.streamer.utils
+package com.mymedia.nagasu.utils
 
 fun toSlug(title: String): String {
     return title

@@ -1,8 +1,8 @@
-package com.mymedia.streamer.utils
+package com.mymedia.nagasu.utils
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import com.mymedia.streamer.dto.metadata.CollectionMetadata
+import com.mymedia.nagasu.dto.metadata.CollectionMetadata
 import java.io.File
 
 private val objectMapper = jacksonObjectMapper()

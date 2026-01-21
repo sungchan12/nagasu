@@ -1,7 +1,7 @@
-package com.mymedia.streamer.repository
+package com.mymedia.nagasu.repository
 
-import com.mymedia.streamer.utils.isVideoFile
-import com.mymedia.streamer.utils.isSubtitleFile
+import com.mymedia.nagasu.utils.isVideoFile
+import com.mymedia.nagasu.utils.isSubtitleFile
 import java.io.File
 
 fun File.getVideoCollection(): List<String> {

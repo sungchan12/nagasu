@@ -1,4 +1,4 @@
-package com.mymedia.streamer.dto
+package com.mymedia.nagasu.dto
 
 data class VideoUploadResponseDto(
     val message: String,

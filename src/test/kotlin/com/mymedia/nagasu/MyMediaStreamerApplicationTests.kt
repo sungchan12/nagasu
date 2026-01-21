@@ -1,4 +1,4 @@
-package com.mymedia.streamer
+package com.mymedia.nagasu
 
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest

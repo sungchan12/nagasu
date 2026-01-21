@@ -1,10 +1,10 @@
-package com.mymedia.streamer.controller
+package com.mymedia.nagasu.controller
 
-import com.mymedia.streamer.dto.ImageCollectionResponse
-import com.mymedia.streamer.dto.ImageDetailsResponse
-import com.mymedia.streamer.dto.ImageUploadDto
-import com.mymedia.streamer.dto.ImageUploadResponse
-import com.mymedia.streamer.service.ImageService
+import com.mymedia.nagasu.dto.ImageCollectionResponse
+import com.mymedia.nagasu.dto.ImageDetailsResponse
+import com.mymedia.nagasu.dto.ImageUploadDto
+import com.mymedia.nagasu.dto.ImageUploadResponse
+import com.mymedia.nagasu.service.ImageService
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.DeleteMapping

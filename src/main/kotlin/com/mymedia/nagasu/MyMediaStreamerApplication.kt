@@ -1,4 +1,4 @@
-package com.mymedia.streamer
+package com.mymedia.nagasu
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
