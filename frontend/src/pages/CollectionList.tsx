@@ -9,9 +9,10 @@ const API_BASE = 'http://localhost:8080';
 type Props = {
   onSelectCollection: (id: string) => void;
   onUploadClick: () => void;
+  onVideoClick: () => void;
 };
 
-export function CollectionList({ onSelectCollection, onUploadClick }: Props) {
+export function CollectionList({ onSelectCollection, onUploadClick, onVideoClick }: Props) {
   const [collections, setCollections] = useState<ImageCollection[]>([]);
   const [filteredCollections, setFilteredCollections] = useState<ImageCollection[]>([]);
   const [loading, setLoading] = useState(true);
@@ -63,6 +64,9 @@ export function CollectionList({ onSelectCollection, onUploadClick }: Props) {
     <div className="collection-list-page">
       <div className="list-header">
         <SearchBar onSearch={handleSearch} />
+        <button className="video-button" onClick={onVideoClick}>
+          Videos
+        </button>
         <button className="upload-button" onClick={onUploadClick}>
           + Upload
         </button>
