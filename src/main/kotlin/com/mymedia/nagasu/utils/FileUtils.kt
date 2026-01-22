@@ -3,6 +3,7 @@ package com.mymedia.nagasu.utils
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.mymedia.nagasu.dto.metadata.CollectionMetadata
+import org.slf4j.LoggerFactory
 import java.io.File
 
 private val objectMapper = jacksonObjectMapper()
@@ -38,10 +39,17 @@ fun File.countVideoFiles(): Int {
     return this.walkTopDown().count { it.isVideoFile() }
 }
 
-fun File.getMetaData(): CollectionMetadata {
+fun File.getMetaData(): CollectionMetadata? {
     val metadataFile = File(this, "metadata.json")
-    require(metadataFile.exists()) { "metadata file does not exist." }
-    return objectMapper.readValue<CollectionMetadata>(metadataFile)
+    if (!metadataFile.exists()) return null
+    return try {
+        objectMapper.readValue<CollectionMetadata>(metadataFile)
+    } catch (e: Exception) {
+        LoggerFactory
+            .getLogger("FileUtils")
+            .warn("metadata parsing incomplete: ${this.absolutePath}/metadata.json - ${e.message}")
+        null
+    }
 }
 
 fun File.saveMetaData(metadata: CollectionMetadata) {
