@@ -3,7 +3,6 @@ package com.mymedia.nagasu.service
 import com.mymedia.nagasu.dto.VideoCollectionResponse
 import com.mymedia.nagasu.dto.VideoDetailsResponse
 import com.mymedia.nagasu.dto.VideoUploadRequestDto
-import com.mymedia.nagasu.dto.VideoUploadResponseDto
 import com.mymedia.nagasu.dto.metadata.CollectionMetadata
 import com.mymedia.nagasu.repository.getSubtitleFileName
 import com.mymedia.nagasu.repository.getThumbnailFileName
@@ -27,42 +26,56 @@ class VideoService(
     @Value("\${storage.path}") private val storagePath: String) {
     private val videoDir = File(storagePath, "videos")
     private val logger = LoggerFactory.getLogger(VideoService::class.java)
+
     fun getVideoCollection(): List<VideoCollectionResponse> {
         videoDir.ensureExists()
         return videoDir.getVideoCollection()
             .mapNotNull { folderName ->
-                val folder = File(videoDir, folderName)
-                val thumbnailUrl = getThumbnailUrl(folder) ?: return@mapNotNull null
-                val metadata = folder.getMetaData()
+                try {
+                    val folder = File(videoDir, folderName)
+                    val thumbnailUrl = getThumbnailUrl(folder) ?: return@mapNotNull null
+                    val metadata = folder.getMetaData() //nullable
 
-                VideoCollectionResponse(
-                    id = folderName,
-                    title = metadata?.title ?: folderName,
-                    artist = metadata?.artist ?: "",
-                    tags = metadata?.tags ?: emptyList(),
-                    thumbnailUrl = thumbnailUrl
-                )
+                    VideoCollectionResponse(
+                        id = folderName,
+                        title = metadata?.title ?: folderName,
+                        artist = metadata?.artist ?: "",
+                        tags = metadata?.tags ?: emptyList(),
+                        thumbnailUrl = thumbnailUrl
+                    )
+                } catch (e: Exception) {
+                    logger.warn("컬렉션 로드 실패: $folderName - ${e.message}")
+                    null
+                }
             }
     }
 
     fun getVideoCollectionDetails(collectionId: String): VideoDetailsResponse? {
-        val videoColDir = File(videoDir, collectionId)
-        videoDir.ensureExists()
-        val metadata = videoColDir.getMetaData()
-        val thumbnailUrl = getThumbnailUrl(videoColDir) ?: return null
-        val videoUrl = getVideoUrl(videoColDir) ?: return null
-        val videoSubtitleUrl = getVideoSubtitle(videoColDir) ?: return null
-        return VideoDetailsResponse(
-            id = collectionId,
-            name = videoColDir.name,
-            title = metadata.title,
-            artist = metadata.artist,
-            tags = metadata.tags,
-            description = metadata.description,
-            thumbnailUrl = thumbnailUrl,
-            videoUrl = videoUrl,
-            videoSubtitleUrl = videoSubtitleUrl
-        )
+        return try {
+            val videoColDir = File(videoDir, collectionId)
+            videoDir.ensureExists()
+            if (!videoColDir.exists() || !videoColDir.isDirectory) return null
+
+            val metadata = videoColDir.getMetaData()
+            val thumbnailUrl = getThumbnailUrl(videoColDir) ?: return null
+            val videoUrl = getVideoUrl(videoColDir) ?: return null
+            val videoSubtitleUrl = getVideoSubtitle(videoColDir)
+
+            VideoDetailsResponse(
+                id = collectionId,
+                name = videoColDir.name,
+                title = metadata?.title ?: videoColDir.name,
+                artist = metadata?.artist ?: "Unknown",
+                tags = metadata?.tags ?: emptyList(),
+                description = metadata?.description ?: "",
+                thumbnailUrl = thumbnailUrl,
+                videoUrl = videoUrl,
+                videoSubtitleUrl = videoSubtitleUrl
+            )
+        } catch (e: Exception) {
+            logger.warn("Get Collection Details Error: $collectionId - ${e.message}")
+            null
+        }
     }
 
     private fun getThumbnailUrl(collectionDir: File): String? {
@@ -76,17 +89,26 @@ class VideoService(
     }
 
     private fun getVideoSubtitle(collectionDir: File): String? {
-        val videoSubtitle = collectionDir.getSubtitleFileName()
+        val videoSubtitle = collectionDir.getSubtitleFileName() ?: return null
         return "/storage/videos/${collectionDir.name}/$videoSubtitle"
     }
 
-    fun uploadVideoCollection(videoUploadRequestDto: VideoUploadRequestDto): VideoUploadResponseDto {
+    fun uploadVideoCollection(videoUploadRequestDto: VideoUploadRequestDto): String {
         logger.info("비디오 업로드 시작: title=${videoUploadRequestDto.title}")
-        return try {
-            videoDir.ensureExists()
-            val collectionId = toSlug(videoUploadRequestDto.title)
-            val collectionDir = File(videoDir, collectionId)
-            collectionDir.ensureExists()
+        videoDir.ensureExists()
+        val collectionId = toSlug(videoUploadRequestDto.title)
+        val collectionDir = File(videoDir, collectionId)
+
+        // 이미 존재하는 컬렉션 체크
+        if (collectionDir.exists()) {
+            logger.warn("이미 존재하는 컬렉션: $collectionId")
+            throw IllegalStateException("이미 존재하는 컬렉션입니다: $collectionId")
+        }
+
+        var folderCreated = false
+        try {
+            collectionDir.mkdirs()
+            folderCreated = true
 
             // 비디오 저장
             val originalFileName = videoUploadRequestDto.video.originalFilename ?: "video.mp4"
@@ -102,7 +124,11 @@ class VideoService(
                 thumbnailInput.transferTo(thumbnailFile)
             } else {
                 // FFmpeg으로 비디오에서 썸네일 자동 생성
-                extractThumbnailToFolder(videoFile)
+                val thumbnailFile = extractThumbnailToFolder(videoFile)
+                if (thumbnailFile == null) {
+                    logger.error("thumbnailFile create failed")
+                    throw IllegalStateException("thumbnailFile create failed")
+                }
             }
             // 자막 저장
             val subtitleInput = videoUploadRequestDto.subtitle
@@ -122,17 +148,16 @@ class VideoService(
             )
             collectionDir.saveMetaData(metadata)
             logger.info("비디오 업로드 성공: collectionId=$collectionId")
-            VideoUploadResponseDto(
-                message = "동영상 업로드 성공",
-                status = true,
-                collectionId = collectionId
-            )
+
+            return collectionId
         } catch (e: Exception) {
-            logger.error("동영상 업로드 실패: ${e.message}")
-            VideoUploadResponseDto(
-                message = "동영상 업로드 실패",
-                status = false
-            )
+            logger.error("비디오 업로드 실패: $collectionId - ${e.message}", e)
+            // 이 요청으로 생성된 폴더만 삭제 (롤백)
+            if (folderCreated && collectionDir.exists()) {
+                collectionDir.deleteRecursively()
+                logger.info("롤백 완료: 생성된 파일 삭제 - $collectionId")
+            }
+            throw e
         }
     }
 
