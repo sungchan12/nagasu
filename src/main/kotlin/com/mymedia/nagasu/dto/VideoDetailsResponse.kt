@@ -9,5 +9,5 @@ data class VideoDetailsResponse(
     val description: String,
     val thumbnailUrl: String,
     val videoUrl: String,
-    val videoSubtitleUrl: String
+    val videoSubtitleUrl: String?
 )
