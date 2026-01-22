@@ -3,7 +3,6 @@ package com.mymedia.nagasu.controller
 import com.mymedia.nagasu.dto.VideoCollectionResponse
 import com.mymedia.nagasu.dto.VideoDetailsResponse
 import com.mymedia.nagasu.dto.VideoUploadRequestDto
-import com.mymedia.nagasu.dto.VideoUploadResponseDto
 import com.mymedia.nagasu.service.VideoService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -21,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/api/videos")
 class VideoController(
     private val videoService: VideoService) {
+
     @GetMapping
     fun getVideos(): List<VideoCollectionResponse> {
         return videoService.getVideoCollection()
@@ -33,9 +33,13 @@ class VideoController(
     }
 
     @PostMapping
-    fun uploadVideoCollection(@ModelAttribute requestDto : VideoUploadRequestDto): ResponseEntity<VideoUploadResponseDto> {
-        val result = videoService.uploadVideoCollection(requestDto)
-        return ResponseEntity.ok(result)
+    fun uploadVideoCollection(@ModelAttribute requestDto : VideoUploadRequestDto): ResponseEntity<Map<String, Any>> {
+        val collectionId = videoService.uploadVideoCollection(requestDto)
+        return ResponseEntity.ok(mapOf(
+            "success" to true,
+            "message" to "Video uploaded successfully",
+            "collectionId" to collectionId
+        ))
     }
 
     @DeleteMapping("/{id}")
