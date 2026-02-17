@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import type { ImageDetails } from '../types';
 import './CollectionDetail.css';
 
-const API_BASE = 'http://localhost:8080';
+const API_BASE = '';
 
 type Props = {
   collectionId: string;

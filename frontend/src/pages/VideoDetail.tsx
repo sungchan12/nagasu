@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import type { VideoDetails } from '../types';
 import './VideoDetail.css';
 
-const API_BASE = 'http://localhost:8080';
+const API_BASE = '';
 
 type Props = {
   videoId: string;
@@ -67,7 +67,15 @@ export function VideoDetail({ videoId, onBack }: Props) {
           src={`${API_BASE}${details.videoUrl}`}
           controls
           poster={`${API_BASE}${details.thumbnailUrl}`}
-        />
+        >
+          {details.videoSubtitleUrl && (
+            <track
+              kind="subtitles"
+              src={`${API_BASE}${details.videoSubtitleUrl}`}
+              default
+            />
+          )}
+        </video>
       </div>
 
       <div className="video-detail-info">

@@ -8,5 +8,5 @@ data class VideoCollectionResponse(
     val title: String,
     val artist: String,
     val tags: List<String>,
-    val thumbnailUrl: String
+    val thumbnailUrl: String?
 )

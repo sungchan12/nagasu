@@ -4,7 +4,7 @@ import { VideoCard } from '../components/VideoCard';
 import type { VideoCollection } from '../types';
 import './VideoList.css';
 
-const API_BASE = 'http://localhost:8080';
+const API_BASE = '';
 
 type Props = {
   onSelectVideo: (id: string) => void;
@@ -57,32 +57,27 @@ export function VideoList({ onSelectVideo, onBack, onUploadClick }: Props) {
     onSelectVideo(video.id);
   };
 
-  if (loading) return <div className="loading">Loading...</div>;
-  if (error) return <div className="error">Error: {error}</div>;
-
   return (
     <div className="video-list-page">
       <div className="list-header">
-        <button className="back-button" onClick={onBack}>
-          &larr; Back
-        </button>
         <SearchBar onSearch={handleSearch} />
-        <button className="upload-button" onClick={onUploadClick}>
-          + Upload
-        </button>
       </div>
-      <div className="video-list">
-        {filteredVideos.map((video) => (
-          <VideoCard
-            key={video.id}
-            video={video}
-            onClick={handleVideoClick}
-          />
-        ))}
-        {filteredVideos.length === 0 && (
-          <div className="no-results">No videos found</div>
-        )}
-      </div>
+      {loading && <div className="loading">Loading...</div>}
+      {error && <div className="error">Error: {error}</div>}
+      {!loading && !error && (
+        <div className="video-list">
+          {filteredVideos.map((video) => (
+            <VideoCard
+              key={video.id}
+              video={video}
+              onClick={handleVideoClick}
+            />
+          ))}
+          {filteredVideos.length === 0 && (
+            <div className="no-results">No videos found</div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

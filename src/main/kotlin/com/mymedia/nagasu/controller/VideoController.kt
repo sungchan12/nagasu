@@ -1,5 +1,6 @@
 package com.mymedia.nagasu.controller
 
+import com.mymedia.nagasu.dto.ApiResponse
 import com.mymedia.nagasu.dto.VideoCollectionResponse
 import com.mymedia.nagasu.dto.VideoDetailsResponse
 import com.mymedia.nagasu.dto.VideoUploadRequestDto
@@ -14,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 /**
- * 비디오 컬렉션 API 컨트롤러
+ * Video collection API controller
  */
 @RestController
 @RequestMapping("/api/videos")
@@ -27,24 +28,25 @@ class VideoController(
     }
 
     @GetMapping("{id}/details")
-    fun getVideoCollectionDetails(@PathVariable id: String): ResponseEntity<VideoDetailsResponse> {
-        val result = videoService.getVideoCollectionDetails(id)
-        return ResponseEntity.ok(result)
+    fun getVideoCollectionDetails(@PathVariable id: String): VideoDetailsResponse {
+        return videoService.getVideoCollectionDetails(id)
     }
 
     @PostMapping
-    fun uploadVideoCollection(@ModelAttribute requestDto : VideoUploadRequestDto): ResponseEntity<Map<String, Any>> {
+    fun uploadVideoCollection(@ModelAttribute requestDto : VideoUploadRequestDto): ResponseEntity<ApiResponse<String>> {
         val collectionId = videoService.uploadVideoCollection(requestDto)
-        return ResponseEntity.ok(mapOf(
-            "success" to true,
-            "message" to "Video uploaded successfully",
-            "collectionId" to collectionId
-        ))
+        return ResponseEntity.ok(ApiResponse.Success(collectionId))
     }
 
     @DeleteMapping("/{id}")
-    fun deleteVideoCollection(@PathVariable id: String): ResponseEntity<Map<String, Any>> {
+    fun deleteVideoCollection(@PathVariable id: String): ResponseEntity<ApiResponse<String>> {
         videoService.deleteVideoCollection(id)
-        return ResponseEntity.ok(mapOf("success" to true, "message" to "Video deleted successfully"))
+        return ResponseEntity.ok(ApiResponse.Success("Video deleted successfully"))
+    }
+
+    @PostMapping("{id}/repair")
+    fun repairVideoCollection(@PathVariable id: String): ResponseEntity<ApiResponse<String>> {
+        videoService.repairVideoCollection(id)
+        return ResponseEntity.ok(ApiResponse.Success("Video repaired successfully"))
     }
 }

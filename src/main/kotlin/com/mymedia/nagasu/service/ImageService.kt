@@ -3,48 +3,55 @@ package com.mymedia.nagasu.service
 import com.mymedia.nagasu.dto.ImageCollectionResponse
 import com.mymedia.nagasu.dto.ImageDetailsResponse
 import com.mymedia.nagasu.dto.ImageUploadDto
-import com.mymedia.nagasu.dto.ImageUploadResponse
 import com.mymedia.nagasu.dto.metadata.CollectionMetadata
 import com.mymedia.nagasu.utils.toSlug
 import com.mymedia.nagasu.utils.ensureExists
 import com.mymedia.nagasu.utils.getMetaData
-import com.mymedia.nagasu.utils.saveMetaData
 import com.mymedia.nagasu.repository.getCollectionDirs
 import com.mymedia.nagasu.repository.getThumbnailFileName
 import com.mymedia.nagasu.repository.getImageFileNames
+import com.mymedia.nagasu.utils.isImageFile
+import com.mymedia.nagasu.utils.saveMetaData
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import java.io.File
+import java.nio.file.Path
 
 /**
- * 이미지 컬렉션 관리 서비스
+ * Image collection management service
  */
 @Service
 class ImageService(
-    @Value("\${storage.path}") private val storagePath: String
-) {
-    private val imagesDir: File get() = File(storagePath, "images")
-
+    @Value("\${storage.path}") private val storagePath: String) {
+    private val imagesDir = File(storagePath, "images")
+    private val logger = LoggerFactory.getLogger(ImageService::class.java)
     /**
-     * 이미지 컬렉션(폴더) 목록을 조회한다.
+     * Returns all image collections.
+     * Skips collections that fail to load.
      */
     fun getCollections(): List<ImageCollectionResponse> {
         imagesDir.ensureExists()
 
         return imagesDir.getCollectionDirs()
-            .map { folderName ->
-                val folder = File(imagesDir, folderName)
-                val thumbnailUrl = getThumbnailUrl(folderName, folder)
-                val metadata = folder.getMetaData()
+            .mapNotNull { folderName ->
+                try {
+                    val folder = File(imagesDir, folderName)
+                    val thumbnailUrl = getThumbnailUrl(folderName, folder)
+                    val metadata = folder.getMetaData()
 
-                ImageCollectionResponse(
-                    id = folderName,
-                    name = folderName,
-                    title = metadata?.title ?: folderName,
-                    artist = metadata?.artist ?: "",
-                    tags = metadata?.tags ?: emptyList(),
-                    thumbnailUrl = thumbnailUrl
-                )
+                    ImageCollectionResponse(
+                        id = folderName,
+                        name = folderName,
+                        title = metadata?.title ?: folderName,
+                        artist = metadata?.artist ?: "",
+                        tags = metadata?.tags ?: emptyList(),
+                        thumbnailUrl = thumbnailUrl
+                    )
+                } catch (e: Exception) {
+                    logger.warn("Failed to load collection: $folderName - ${e.message}")
+                    null
+                }
             }
     }
 
@@ -52,12 +59,14 @@ class ImageService(
         val thumbnailName = collectionDir.getThumbnailFileName()
         return "/storage/images/$collectionId/$thumbnailName"
     }
+
     /**
-     * 이미지 컬렉션 상세 정보를 조회한다.
+     * Returns image collection details.
+     * @throws NoSuchElementException if collection does not exist
      */
-    fun getCollectionDetails(collectionId: String): ImageDetailsResponse? {
+    fun getCollectionDetails(collectionId: String): ImageDetailsResponse {
         val collectionDir = File(imagesDir, collectionId)
-        if (!collectionDir.exists() || !collectionDir.isDirectory) return null
+        if (!collectionDir.exists() || !collectionDir.isDirectory) throw NoSuchElementException("Collection not found: $collectionId")
 
         val metadata = collectionDir.getMetaData()
         val imageNames = collectionDir.getImageFileNames()
@@ -76,36 +85,39 @@ class ImageService(
         )
     }
 
-    fun createCollection(request: ImageUploadDto): ImageUploadResponse {
-        return try {
-            imagesDir.ensureExists()
-            val collectionId = toSlug(request.title)
-            val collectionDir = File(imagesDir, collectionId)
+    fun createCollection(request: ImageUploadDto): String {
+        logger.info("Images upload started: title=${request.title}")
+        imagesDir.ensureExists()
+        val collectionId = toSlug(request.title)
+        val collectionDir = File(imagesDir, collectionId)
 
-            if (!collectionDir.exists()) {
-                collectionDir.mkdirs()
-            }
+        if (collectionDir.exists()) {
+            logger.warn("Collection already exists: $collectionId")
+            throw IllegalStateException("Collection already exists: $collectionId")
+        }
 
-            // 이미지 리스트 저장
+        var folderCreated = false
+        try {
+            collectionDir.mkdirs()
+            folderCreated = true
             request.images.forEachIndexed { index, file ->
                 if (!file.isEmpty) {
-                    val extension = file.originalFilename?.substringAfterLast('.') ?: "jpg"
+                    val safeName = Path.of(file.originalFilename ?: "image.jpg").fileName.toString()
+                    val extension = safeName.substringAfterLast('.', "jpg")
                     val fileName = String.format("%03d.%s", index + 1, extension)
-                    val targetFile = File(collectionDir, fileName)
-                    file.transferTo(targetFile)
+                    val imageFile = File(collectionDir, fileName)
+                    file.transferTo(imageFile)
                 }
             }
-
-            // 썸네일 저장
-            request.thumbnail?.let { file ->
-                if (!file.isEmpty) {
-                    val extension = file.originalFilename?.substringAfterLast('.') ?: "jpg"
-                    val thumbnailFile = File(collectionDir, "thumbnail.$extension")
-                    file.transferTo(thumbnailFile)
-                }
+            if (request.thumbnail != null && !request.thumbnail.isEmpty) {
+                val safeName = Path.of(request.thumbnail.originalFilename ?: "thumbnail.jpg").fileName.toString()
+                val extension = safeName.substringAfterLast('.', "jpg")
+                val thumbnailFile = File(collectionDir, "thumbnail.${extension}")
+                request.thumbnail.transferTo(thumbnailFile)
+            } else {
+                val firstImage = collectionDir.listFiles()?.firstOrNull { it.isImageFile() }
+                firstImage?.copyTo(File(collectionDir, "thumbnail.${firstImage.extension}"))
             }
-
-            // metadata.json 저장
             val metadata = CollectionMetadata(
                 title = request.title,
                 artist = request.artist,
@@ -113,31 +125,40 @@ class ImageService(
                 description = request.description ?: ""
             )
             collectionDir.saveMetaData(metadata)
-
-            ImageUploadResponse(
-                message = "컬렉션이 생성되었습니다. ID: $collectionId",
-                status = true
-            )
+            logger.info("Image upload successful: collectionId=$collectionId")
+            return collectionId
         } catch (e: Exception) {
-            ImageUploadResponse(
-                message = "컬렉션 생성 실패: ${e.message}",
-                status = false
-            )
+            logger.error("Images upload failed: $collectionId - ${e.message}", e)
+            if (folderCreated && collectionDir.exists()) {
+                val deleted = collectionDir.deleteRecursively()
+                if (deleted) {
+                    logger.info("Rollback complete: deleted folder - $collectionId")
+                } else {
+                    logger.error("Rollback failed: unable to delete folder - $collectionId")
+                }
+            }
+            throw e
         }
     }
+
     /**
-     * 컬렉션을 삭제한다.
+     * Deletes an image collection.
+     * @throws NoSuchElementException if collection does not exist
+     * @throws IllegalStateException if deletion fails
      */
-    fun deleteCollection(collectionId: String): Boolean {
+    fun deleteCollection(collectionId: String) {
         val collectionDir = File(imagesDir, collectionId)
         if (!collectionDir.exists() || !collectionDir.isDirectory) {
-            return false
+            logger.warn("Collection not found for deletion: $collectionId")
+            throw NoSuchElementException("Collection not found: $collectionId")
         }
-        return try {
-            collectionDir.deleteRecursively()
-            true
-        } catch (e: Exception) {
-            false
+
+        val deleted = collectionDir.deleteRecursively()
+        if (!deleted) {
+            logger.error("Failed to delete image collection: $collectionId")
+            throw IllegalStateException("Failed to delete collection: $collectionId")
         }
+
+        logger.info("Collection deleted: $collectionId")
     }
 }

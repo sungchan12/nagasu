@@ -1,12 +1,25 @@
 .search-bar {
   width: 100%;
-  padding: 16px;
+  padding: 10px;
   box-sizing: border-box;
+}
+
+.search-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-icon {
+  position: absolute;
+  left: 14px;
+  pointer-events: none;
+  opacity: 0.5;
 }
 
 .search-input {
   width: 100%;
-  padding: 12px 16px;
+  padding: 12px 16px 12px 42px;
   font-size: 16px;
   border: 2px solid #333;
   border-radius: 8px;

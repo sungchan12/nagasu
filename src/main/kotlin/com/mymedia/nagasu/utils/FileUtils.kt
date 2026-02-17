@@ -56,3 +56,8 @@ fun File.saveMetaData(metadata: CollectionMetadata) {
     val metadataFile = File(this, "metadata.json")
     objectMapper.writeValue(metadataFile, metadata)
 }
+
+fun File.incrementViewCount() {
+    val metadata = this.getMetaData() ?: return
+    this.saveMetaData(metadata.copy(viewCount = metadata.viewCount + 1))
+}

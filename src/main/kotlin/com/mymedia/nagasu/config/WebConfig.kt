@@ -16,6 +16,7 @@ class WebConfig(
             .allowedOrigins("http://localhost:5173")
             .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
             .allowedHeaders("*")
+            .exposedHeaders("Content-Type", "Content-Length", "Accept-Ranges", "Content-Range")
     }
 
     override fun addResourceHandlers(registry: ResourceHandlerRegistry) {

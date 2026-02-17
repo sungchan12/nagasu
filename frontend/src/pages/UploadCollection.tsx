@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import './UploadCollection.css';
 
-const API_BASE = 'http://localhost:8080';
+const API_BASE = '';
 
 type Props = {
   onBack: () => void;

@@ -15,5 +15,6 @@ fun File.getVideoFileName(): String? {
 
 fun File.getSubtitleFileName(): String? {
     if (!this.isDirectory) return null
-    return this.listFiles()?.firstOrNull { it.isSubtitleFile() }?.name
+    return this.listFiles()?.find { it.extension.equals("vtt", true) }?.name
+        ?: this.listFiles()?.firstOrNull{ it.isSubtitleFile() }?.name
 }
