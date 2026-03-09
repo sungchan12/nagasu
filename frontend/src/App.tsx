@@ -8,7 +8,7 @@ import { VideoDetail } from './pages/VideoDetail';
 import { VideoUpload } from './pages/VideoUpload';
 import './App.css';
 
-type Page = 'list' | 'detail' | 'upload' | 'video-list' | 'video-detail' | 'video-upload';
+type Page = 'list' | 'detail' | 'upload' | 'video-list' | 'video-detail' | 'video-upload' | 'most-viewed' | 'image-most-viewed';
 
 function App() {
   const [page, setPage] = useState<Page>('video-list');
@@ -71,6 +71,15 @@ function App() {
             onSelectVideo={handleSelectVideo}
             onBack={handleBack}
             onUploadClick={() => setPage('video-upload')}
+          />
+        )}
+        {page === 'most-viewed' && (
+          <VideoList
+            onSelectVideo={handleSelectVideo}
+            onBack={handleBack}
+            onUploadClick={() => setPage('video-upload')}
+            sort="viewCount"
+            order="desc"
           />
         )}
         {page === 'video-upload' && (

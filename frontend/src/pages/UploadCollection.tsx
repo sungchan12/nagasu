@@ -78,8 +78,8 @@ export function UploadCollection({ onBack, onSuccess }: Props) {
 
       const result = await response.json();
 
-      if (!response.ok || !result.status) {
-        throw new Error(result.message || 'Upload failed');
+      if (!response.ok || result.error) {
+        throw new Error(result.error || 'Upload failed');
       }
 
       onSuccess();

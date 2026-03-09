@@ -1,7 +1,7 @@
 import './Sidebar.css';
 
 // 'most-viewed' 타입을 추가했습니다.
-type Page = 'list' | 'detail' | 'upload' | 'video-list' | 'video-detail' | 'video-upload' | 'most-viewed';
+type Page = 'list' | 'detail' | 'upload' | 'video-list' | 'video-detail' | 'video-upload' | 'most-viewed' | 'image-most-viewed';
 
 type Props = {
   currentPage: Page;
@@ -11,7 +11,7 @@ type Props = {
 export function Sidebar({ currentPage, onNavigate }: Props) {
   // 현재 어떤 페이지군에 속해있는지 확인 (아이콘 색상 활성화용)
   const isVideoPage = ['video-list', 'video-detail', 'video-upload', 'most-viewed'].includes(currentPage);
-  const isImagePage = ['list', 'detail', 'upload'].includes(currentPage);
+  const isImagePage = ['list', 'detail', 'upload', 'image-most-viewed'].includes(currentPage);
 
   return (
     <nav className="sidebar">
@@ -63,6 +63,12 @@ export function Sidebar({ currentPage, onNavigate }: Props) {
             onClick={() => onNavigate('list')}
           >
             Recently Upload
+          </button>
+          <button
+            className={`sidebar-sub-item ${currentPage === 'image-most-viewed' ? 'active' : ''}`}
+            onClick={() => onNavigate('image-most-viewed')}
+          >
+            Most Viewed
           </button>
         </div>
       </div>

@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 /**
@@ -23,8 +24,11 @@ class VideoController(
     private val videoService: VideoService) {
 
     @GetMapping
-    fun getVideos(): List<VideoCollectionResponse> {
-        return videoService.getVideoCollection()
+    fun getVideos(
+        @RequestParam(defaultValue = "title") sort: String,
+        @RequestParam(defaultValue = "asc") order: String
+    ): List<VideoCollectionResponse> {
+        return videoService.getVideoCollection(sort, order)
     }
 
     @GetMapping("{id}/details")

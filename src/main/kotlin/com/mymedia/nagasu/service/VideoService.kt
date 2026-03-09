@@ -46,9 +46,9 @@ class VideoService(
      * Returns all video collections.
      * Skips collections that fail to load.
      */
-    fun getVideoCollection(): List<VideoCollectionResponse> {
+    fun getVideoCollection(sort: String, order: String): List<VideoCollectionResponse> {
         videoDir.ensureExists()
-        return videoDir.getVideoCollection()
+        val list = videoDir.getVideoCollection()
             .mapNotNull { folderName ->
                 try {
                     val folder = File(videoDir, folderName)
@@ -60,13 +60,21 @@ class VideoService(
                         title = metadata?.title ?: folderName,
                         artist = metadata?.artist ?: "",
                         tags = metadata?.tags ?: emptyList(),
-                        thumbnailUrl = thumbnailUrl
+                        thumbnailUrl = thumbnailUrl,
+                        viewCount = metadata?.viewCount ?: 0
                     )
                 } catch (e: Exception) {
                     logger.warn("Failed to load collection: $folderName - ${e.message}")
                     null
                 }
             }
+        val sorted = when (sort) {
+            "viewCount" -> list.sortedBy { it.viewCount }
+            else -> list.sortedBy { it.title }
+        }
+        return if (order == "desc") {
+            sorted.reversed()
+        } else sorted
     }
 
     /**

@@ -17,42 +17,49 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import java.io.File
 import java.nio.file.Path
+import java.util.Collections.list
 
 /**
  * Image collection management service
  */
 @Service
 class ImageService(
-    @Value("\${storage.path}") private val storagePath: String) {
+    @Value("\${storage.path}")
+    private val storagePath: String) {
     private val imagesDir = File(storagePath, "images")
     private val logger = LoggerFactory.getLogger(ImageService::class.java)
     /**
      * Returns all image collections.
      * Skips collections that fail to load.
      */
-    fun getCollections(): List<ImageCollectionResponse> {
+    fun getCollections(sort: String, order: String): List<ImageCollectionResponse> {
         imagesDir.ensureExists()
+        val list = imagesDir.getCollectionDirs().mapNotNull {
+            folderName ->
+            try {
+                val folder = File(imagesDir, folderName)
+                val thumbnailFileUrl = getThumbnailUrl(folderName, folder)
+                val metadata = folder.getMetaData()
 
-        return imagesDir.getCollectionDirs()
-            .mapNotNull { folderName ->
-                try {
-                    val folder = File(imagesDir, folderName)
-                    val thumbnailUrl = getThumbnailUrl(folderName, folder)
-                    val metadata = folder.getMetaData()
-
-                    ImageCollectionResponse(
-                        id = folderName,
-                        name = folderName,
-                        title = metadata?.title ?: folderName,
-                        artist = metadata?.artist ?: "",
-                        tags = metadata?.tags ?: emptyList(),
-                        thumbnailUrl = thumbnailUrl
-                    )
-                } catch (e: Exception) {
-                    logger.warn("Failed to load collection: $folderName - ${e.message}")
-                    null
-                }
+                ImageCollectionResponse(
+                    id = folderName,
+                    name = folderName,
+                    title = metadata?.title ?: folderName,
+                    artist = metadata?.artist ?: "Unknown",
+                    tags = metadata?.tags ?: emptyList(),
+                    thumbnailUrl = thumbnailFileUrl,
+                    viewCount = metadata?.viewCount ?: 0
+                )
+            } catch (e: Exception) {
+                logger.error(e.message)
+                null
             }
+        }
+        val sorted = when (sort) {
+            "viewCount" -> list.sortedBy { it.viewCount }
+            else -> list.sortedBy { it.title }
+        }
+        return sorted
     }
 
     private fun getThumbnailUrl(collectionId: String, collectionDir: File): String {
