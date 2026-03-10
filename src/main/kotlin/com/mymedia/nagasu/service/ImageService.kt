@@ -2,6 +2,7 @@ package com.mymedia.nagasu.service
 
 import com.mymedia.nagasu.dto.ImageCollectionResponse
 import com.mymedia.nagasu.dto.ImageDetailsResponse
+import com.mymedia.nagasu.dto.ImageUpdateDto
 import com.mymedia.nagasu.dto.ImageUploadDto
 import com.mymedia.nagasu.dto.metadata.CollectionMetadata
 import com.mymedia.nagasu.utils.toSlug
@@ -167,5 +168,29 @@ class ImageService(
         }
 
         logger.info("Collection deleted: $collectionId")
+    }
+
+    fun updateCollectionMetaData(collectionId: String, request: ImageUpdateDto) {
+        val collectionDir = File(imagesDir, collectionId)
+        if (!collectionDir.exists() || !collectionDir.isDirectory) {
+            logger.warn("Collection not found for deletion(update): $collectionId")
+            throw NoSuchElementException("Collection not found: $collectionId")
+        }
+        val metadata = collectionDir.getMetaData()
+            ?: throw NoSuchElementException("Metadata not found for collection: $collectionId")
+        val updated = metadata.copy(
+            title = request.title ?: metadata.title,
+            artist = request.artist ?: metadata.artist,
+            tags = request.tags ?: metadata.tags,
+            description = request.description ?: metadata.description
+        )
+        collectionDir.saveMetaData(updated)
+
+        if (request.thumbnail != null && !request.thumbnail.isEmpty) {
+            val oldThumbnail = File(collectionDir, "thumbnail.jpg")
+            if (oldThumbnail.exists()) oldThumbnail.delete()
+            request.thumbnail.transferTo(oldThumbnail)
+            logger.info("Thumbnail updated for collection: $collectionId")
+        }
     }
 }

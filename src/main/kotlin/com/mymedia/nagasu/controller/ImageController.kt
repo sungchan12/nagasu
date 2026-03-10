@@ -3,6 +3,7 @@ package com.mymedia.nagasu.controller
 import com.mymedia.nagasu.dto.ApiResponse
 import com.mymedia.nagasu.dto.ImageCollectionResponse
 import com.mymedia.nagasu.dto.ImageDetailsResponse
+import com.mymedia.nagasu.dto.ImageUpdateDto
 import com.mymedia.nagasu.dto.ImageUploadDto
 import com.mymedia.nagasu.service.ImageService
 import org.springframework.http.MediaType
@@ -10,6 +11,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.ModelAttribute
+import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
@@ -56,5 +58,12 @@ class ImageController(
     fun deleteCollection(@PathVariable collectionId: String): ResponseEntity<ApiResponse<String>> {
         imageService.deleteCollection(collectionId)
         return ResponseEntity.ok(ApiResponse.Success("Collection deleted Successfully!"))
+    }
+    @PatchMapping("/{collectionId}", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
+    fun updateCollection(
+        @ModelAttribute imageUpdateRequest: ImageUpdateDto,
+        @PathVariable collectionId: String): ResponseEntity<ApiResponse<String>> {
+        imageService.updateCollectionMetaData(collectionId, imageUpdateRequest)
+        return ResponseEntity.ok(ApiResponse.Success("Collection Updated Successfully!"))
     }
 }
