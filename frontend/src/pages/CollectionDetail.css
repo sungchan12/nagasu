@@ -114,8 +114,29 @@
   color: #888;
 }
 
-.delete-button {
+.detail-actions {
+  display: flex;
+  gap: 12px;
   margin-top: 12px;
+}
+
+.edit-button {
+  padding: 10px 20px;
+  background: #1976d2;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.edit-button:hover {
+  background: #1565c0;
+}
+
+.delete-button {
   padding: 10px 20px;
   background: #d32f2f;
   color: white;
@@ -125,11 +146,93 @@
   font-weight: 500;
   cursor: pointer;
   transition: background 0.2s;
-  align-self: flex-start;
 }
 
 .delete-button:hover {
   background: #b71c1c;
+}
+
+.change-thumbnail-button {
+  width: 100%;
+  padding: 10px;
+  background: #1976d2;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.change-thumbnail-button:hover {
+  background: #1565c0;
+}
+
+.edit-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+.edit-input:focus {
+  outline: none;
+  border-color: #1976d2;
+}
+
+.edit-title-input {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.edit-description-input {
+  resize: vertical;
+}
+
+.edit-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.save-button {
+  padding: 10px 20px;
+  background: #388e3c;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.save-button:hover:not(:disabled) {
+  background: #2e7d32;
+}
+
+.save-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.cancel-edit-button {
+  padding: 10px 20px;
+  background: #f5f5f5;
+  color: #333;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.cancel-edit-button:hover:not(:disabled) {
+  background: #e0e0e0;
 }
 
 .delete-confirm-overlay {

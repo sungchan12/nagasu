@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { ImageDetails } from '../types';
 import './CollectionDetail.css';
 
@@ -16,6 +16,16 @@ export function CollectionDetail({ collectionId, onBack }: Props) {
   const [viewerIndex, setViewerIndex] = useState<number | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
+
+  const [editing, setEditing] = useState(false);
+  const [editTitle, setEditTitle] = useState('');
+  const [editArtist, setEditArtist] = useState('');
+  const [editTags, setEditTags] = useState('');
+  const [editDescription, setEditDescription] = useState('');
+  const [editThumbnail, setEditThumbnail] = useState<File | null>(null);
+  const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const thumbnailInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const fetchDetails = async () => {
@@ -67,6 +77,69 @@ export function CollectionDetail({ collectionId, onBack }: Props) {
     }
   };
 
+  const startEditing = () => {
+    if (!details) return;
+    setEditTitle(details.title);
+    setEditArtist(details.artist);
+    setEditTags(details.tags.join(', '));
+    setEditDescription(details.description || '');
+    setEditThumbnail(null);
+    setThumbnailPreview(null);
+    setEditing(true);
+  };
+
+  const cancelEditing = () => {
+    setEditing(false);
+    setEditThumbnail(null);
+    if (thumbnailPreview) URL.revokeObjectURL(thumbnailPreview);
+    setThumbnailPreview(null);
+  };
+
+  const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setEditThumbnail(file);
+    if (thumbnailPreview) URL.revokeObjectURL(thumbnailPreview);
+    setThumbnailPreview(URL.createObjectURL(file));
+  };
+
+  const handleSave = async () => {
+    if (!details) return;
+    try {
+      setSaving(true);
+      const formData = new FormData();
+      formData.append('title', editTitle);
+      formData.append('artist', editArtist);
+      editTags.split(',').map(t => t.trim()).filter(Boolean).forEach(tag => {
+        formData.append('tags', tag);
+      });
+      formData.append('description', editDescription);
+      if (editThumbnail) {
+        formData.append('thumbnail', editThumbnail);
+      }
+
+      const response = await fetch(`${API_BASE}/api/images/${collectionId}`, {
+        method: 'PATCH',
+        body: formData,
+      });
+      if (!response.ok) throw new Error('Failed to update collection');
+
+      // Refresh details
+      const refreshRes = await fetch(`${API_BASE}/api/images/${collectionId}/details`);
+      if (refreshRes.ok) {
+        setDetails(await refreshRes.json());
+      }
+      setEditing(false);
+      if (thumbnailPreview) URL.revokeObjectURL(thumbnailPreview);
+      setThumbnailPreview(null);
+      setEditThumbnail(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unknown error');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   if (loading) return <div className="loading">Loading...</div>;
   if (error) return <div className="error">Error: {error}</div>;
   if (!details) return <div className="error">Collection not found</div>;
@@ -80,28 +153,91 @@ export function CollectionDetail({ collectionId, onBack }: Props) {
       <div className="detail-header">
         <div className="thumbnail-container">
           <img
-            src={`${API_BASE}${details.thumbnailUrl}`}
+            src={thumbnailPreview || `${API_BASE}${details.thumbnailUrl}`}
             alt={details.title}
             className="detail-thumbnail"
           />
+          {editing && (
+            <>
+              <input
+                ref={thumbnailInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleThumbnailChange}
+                style={{ display: 'none' }}
+              />
+              <button
+                className="change-thumbnail-button"
+                onClick={() => thumbnailInputRef.current?.click()}
+              >
+                Change Thumbnail
+              </button>
+            </>
+          )}
           <button className="read-button" onClick={() => setViewerIndex(0)}>READ</button>
         </div>
 
         <div className="detail-info">
-          <h1 className="detail-title">{details.title}</h1>
-          <p className="detail-artist">{details.artist}</p>
-          <div className="detail-tags">
-            {details.tags.map((tag, index) => (
-              <span key={index} className="tag">{tag}</span>
-            ))}
-          </div>
-          {details.description && (
-            <p className="detail-description">{details.description}</p>
+          {editing ? (
+            <>
+              <input
+                className="edit-input edit-title-input"
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+                placeholder="Title"
+              />
+              <input
+                className="edit-input edit-artist-input"
+                value={editArtist}
+                onChange={(e) => setEditArtist(e.target.value)}
+                placeholder="Artist"
+              />
+              <input
+                className="edit-input edit-tags-input"
+                value={editTags}
+                onChange={(e) => setEditTags(e.target.value)}
+                placeholder="Tags (comma separated)"
+              />
+              <textarea
+                className="edit-input edit-description-input"
+                value={editDescription}
+                onChange={(e) => setEditDescription(e.target.value)}
+                placeholder="Description"
+                rows={3}
+              />
+              <p className="detail-count">{details.fileCount} images</p>
+              <div className="edit-actions">
+                <button className="save-button" onClick={handleSave} disabled={saving}>
+                  {saving ? 'Saving...' : 'Save'}
+                </button>
+                <button className="cancel-edit-button" onClick={cancelEditing} disabled={saving}>
+                  Cancel
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <h1 className="detail-title">{details.title}</h1>
+              <p className="detail-artist">{details.artist}</p>
+              <div className="detail-tags">
+                {details.tags.map((tag, index) => (
+                  <span key={index} className="tag">{tag}</span>
+                ))}
+              </div>
+              {details.description && (
+                <p className="detail-description">{details.description}</p>
+              )}
+              <p className="detail-count">{details.fileCount} images</p>
+              <div className="detail-actions">
+                <button className="edit-button" onClick={startEditing}>
+                  Edit Collection
+                </button>
+                <button className="delete-button" onClick={() => setShowDeleteConfirm(true)}>
+                  Delete Collection
+                </button>
+              </div>
+            </>
           )}
-          <p className="detail-count">{details.fileCount} images</p>
-          <button className="delete-button" onClick={() => setShowDeleteConfirm(true)}>
-            Delete Collection
-          </button>
         </div>
       </div>
 
