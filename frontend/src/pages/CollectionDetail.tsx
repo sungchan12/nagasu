@@ -26,6 +26,8 @@ export function CollectionDetail({ collectionId, onBack }: Props) {
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const thumbnailInputRef = useRef<HTMLInputElement>(null);
+  const addImagesInputRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     const fetchDetails = async () => {
@@ -140,6 +142,32 @@ export function CollectionDetail({ collectionId, onBack }: Props) {
     }
   };
 
+  const handleAddImages = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    try {
+      setUploading(true);
+      const formData = new FormData();
+      Array.from(files).forEach(file => formData.append('images', file));
+
+      const response = await fetch(`${API_BASE}/api/images/${collectionId}/images`, {
+        method: 'POST',
+        body: formData,
+      });
+      if (!response.ok) throw new Error('Failed to add images');
+
+      const refreshRes = await fetch(`${API_BASE}/api/images/${collectionId}/details`);
+      if (refreshRes.ok) {
+        setDetails(await refreshRes.json());
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unknown error');
+    } finally {
+      setUploading(false);
+      e.target.value = '';
+    }
+  };
+
   if (loading) return <div className="loading">Loading...</div>;
   if (error) return <div className="error">Error: {error}</div>;
   if (!details) return <div className="error">Collection not found</div>;
@@ -242,6 +270,23 @@ export function CollectionDetail({ collectionId, onBack }: Props) {
       </div>
 
       <div className="images-section">
+        <div className="images-section-header">
+          <input
+            ref={addImagesInputRef}
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={handleAddImages}
+            style={{ display: 'none' }}
+          />
+          <button
+            className="add-images-button"
+            onClick={() => addImagesInputRef.current?.click()}
+            disabled={uploading}
+          >
+            {uploading ? 'Uploading...' : 'Add Images'}
+          </button>
+        </div>
         <div className="images-grid">
           {details.images.map((imageUrl, index) => (
             <div

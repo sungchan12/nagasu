@@ -322,6 +322,33 @@
   padding: 24px;
 }
 
+.images-section-header {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 16px;
+}
+
+.add-images-button {
+  padding: 10px 20px;
+  background: #1976d2;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.add-images-button:hover:not(:disabled) {
+  background: #1565c0;
+}
+
+.add-images-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .images-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
