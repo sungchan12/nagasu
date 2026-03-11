@@ -61,3 +61,19 @@ fun File.incrementViewCount() {
     val metadata = this.getMetaData() ?: return
     this.saveMetaData(metadata.copy(viewCount = metadata.viewCount + 1))
 }
+
+/**
+ * Prevents Path Traversal by verifying the canonicalized path stays within basePath.
+ * @param basePath The allowed root directory
+ * @param userInput User-provided path segment (e.g. collectionId)
+ * @return The validated canonical path
+ * @throws IllegalArgumentException If the resolved path escapes basePath
+ */
+fun validatePath(basePath: File, userInput: String): File {
+    val resolved = File(basePath, userInput).canonicalFile
+    val base = basePath.canonicalFile
+    require(resolved.path.startsWith(base.path + File.separator) || resolved == base) {
+        "Invalid path: access denied"
+    }
+    return resolved
+}
