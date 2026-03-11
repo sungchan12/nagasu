@@ -23,6 +23,9 @@ import org.springframework.web.bind.annotation.RestController
 class VideoController(
     private val videoService: VideoService) {
 
+    /**
+     * Returns all video collections.
+     */
     @GetMapping
     fun getVideos(
         @RequestParam(defaultValue = "title") sort: String,
@@ -31,23 +34,35 @@ class VideoController(
         return videoService.getVideoCollection(sort, order)
     }
 
+    /**
+     * Returns video collection details.
+     */
     @GetMapping("{id}/details")
     fun getVideoCollectionDetails(@PathVariable id: String): VideoDetailsResponse {
         return videoService.getVideoCollectionDetails(id)
     }
 
+    /**
+     * Uploads a new video collection.
+     */
     @PostMapping
     fun uploadVideoCollection(@ModelAttribute requestDto : VideoUploadRequestDto): ResponseEntity<ApiResponse<String>> {
         val collectionId = videoService.uploadVideoCollection(requestDto)
         return ResponseEntity.ok(ApiResponse.Success(collectionId))
     }
 
+    /**
+     * Deletes a video collection.
+     */
     @DeleteMapping("/{id}")
     fun deleteVideoCollection(@PathVariable id: String): ResponseEntity<ApiResponse<String>> {
         videoService.deleteVideoCollection(id)
         return ResponseEntity.ok(ApiResponse.Success("Video deleted successfully"))
     }
 
+    /**
+     * Repairs a manually added video collection (generates missing metadata, thumbnail, subtitles).
+     */
     @PostMapping("{id}/repair")
     fun repairVideoCollection(@PathVariable id: String): ResponseEntity<ApiResponse<String>> {
         videoService.repairVideoCollection(id)
