@@ -11,11 +11,15 @@ import com.mymedia.nagasu.utils.getMetaData
 import com.mymedia.nagasu.repository.getCollectionDirs
 import com.mymedia.nagasu.repository.getThumbnailFileName
 import com.mymedia.nagasu.repository.getImageFileNames
+import com.mymedia.nagasu.utils.incrementViewCount
 import com.mymedia.nagasu.utils.isImageFile
 import com.mymedia.nagasu.utils.saveMetaData
+import com.mymedia.nagasu.utils.validateCollectionId
+import com.mymedia.nagasu.utils.validatePath
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
+import org.springframework.web.multipart.MultipartFile
 import java.io.File
 import java.nio.file.Path
 import java.util.Collections.list
@@ -63,6 +67,7 @@ class ImageService(
         return sorted
     }
 
+    /** Generates thumbnail URL for the given collection. */
     private fun getThumbnailUrl(collectionId: String, collectionDir: File): String {
         val thumbnailName = collectionDir.getThumbnailFileName()
         return "/storage/images/$collectionId/$thumbnailName"
@@ -73,13 +78,16 @@ class ImageService(
      * @throws NoSuchElementException if collection does not exist
      */
     fun getCollectionDetails(collectionId: String): ImageDetailsResponse {
-        val collectionDir = File(imagesDir, collectionId)
+        validateCollectionId(collectionId)
+        val collectionDir = validatePath(imagesDir, collectionId)
+
         if (!collectionDir.exists() || !collectionDir.isDirectory) throw NoSuchElementException("Collection not found: $collectionId")
 
         val metadata = collectionDir.getMetaData()
         val imageNames = collectionDir.getImageFileNames()
         val imageUrls = imageNames.map { "/storage/images/$collectionId/$it" }
         val thumbnailUrl = getThumbnailUrl(collectionId, collectionDir)
+        collectionDir.incrementViewCount()
 
         return ImageDetailsResponse(
             id = collectionId,
@@ -93,6 +101,12 @@ class ImageService(
         )
     }
 
+    /**
+     * Creates a new image collection.
+     * Rolls back created folder on failure.
+     * @return created collectionId
+     * @throws IllegalStateException if collectionId already exists
+     */
     fun createCollection(request: ImageUploadDto): String {
         logger.info("Images upload started: title=${request.title}")
         imagesDir.ensureExists()
@@ -170,6 +184,10 @@ class ImageService(
         logger.info("Collection deleted: $collectionId")
     }
 
+    /**
+     * Updates collection metadata and optionally replaces the thumbnail.
+     * @throws NoSuchElementException if collection or metadata does not exist
+     */
     fun updateCollectionMetaData(collectionId: String, request: ImageUpdateDto) {
         val collectionDir = File(imagesDir, collectionId)
         if (!collectionDir.exists() || !collectionDir.isDirectory) {
@@ -192,5 +210,24 @@ class ImageService(
             request.thumbnail.transferTo(oldThumbnail)
             logger.info("Thumbnail updated for collection: $collectionId")
         }
+    }
+
+    /**
+     * Adds images to an existing collection.
+     * New images are numbered sequentially after existing ones.
+     * @throws NoSuchElementException if collection does not exist
+     */
+    fun addCollectionImages(collectionId: String, images: List<MultipartFile>) {
+        val collectionDir = File(imagesDir, collectionId)
+        if (!collectionDir.exists() || !collectionDir.isDirectory) {
+            logger.warn("Collection not found for collection(addImagesCollection): $collectionId")
+        }
+        val existingCount = collectionDir.getImageFileNames().size
+        images.forEachIndexed { index, file ->
+            val extension = file.originalFilename?.substringAfterLast('.', "jpg") ?: "jpg"
+            val newName = "%03d.%s".format(existingCount + 1 + index, extension)
+            file.transferTo(File(collectionDir, newName))
+        }
+        logger.info("Added ${images.size} images to collection: $collectionId")
     }
 }
