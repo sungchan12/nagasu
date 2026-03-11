@@ -8,5 +8,5 @@ fun toSlug(title: String): String {
 }
 
 fun validateCollectionId(collectionId: String) {
-    require(collectionId.matches(Regex("^[a-zA-Z0-9가~힣]")))
+    require(collectionId.matches(Regex("^[a-zA-Z0-9가-힣_-]+$")))
 }
