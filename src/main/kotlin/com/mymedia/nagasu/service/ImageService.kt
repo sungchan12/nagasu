@@ -64,7 +64,7 @@ class ImageService(
             "viewCount" -> list.sortedBy { it.viewCount }
             else -> list.sortedBy { it.title }
         }
-        return sorted
+        return if (order == "desc") sorted.reversed() else sorted
     }
 
     /** Generates thumbnail URL for the given collection. */
@@ -169,7 +169,8 @@ class ImageService(
      * @throws IllegalStateException if deletion fails
      */
     fun deleteCollection(collectionId: String) {
-        val collectionDir = File(imagesDir, collectionId)
+        validateCollectionId(collectionId)
+        val collectionDir = validatePath(imagesDir, collectionId)
         if (!collectionDir.exists() || !collectionDir.isDirectory) {
             logger.warn("Collection not found for deletion: $collectionId")
             throw NoSuchElementException("Collection not found: $collectionId")
@@ -189,7 +190,8 @@ class ImageService(
      * @throws NoSuchElementException if collection or metadata does not exist
      */
     fun updateCollectionMetaData(collectionId: String, request: ImageUpdateDto) {
-        val collectionDir = File(imagesDir, collectionId)
+        validateCollectionId(collectionId)
+        val collectionDir = validatePath(imagesDir, collectionId)
         if (!collectionDir.exists() || !collectionDir.isDirectory) {
             logger.warn("Collection not found for deletion(update): $collectionId")
             throw NoSuchElementException("Collection not found: $collectionId")
@@ -205,9 +207,15 @@ class ImageService(
         collectionDir.saveMetaData(updated)
 
         if (request.thumbnail != null && !request.thumbnail.isEmpty) {
-            val oldThumbnail = File(collectionDir, "thumbnail.jpg")
-            if (oldThumbnail.exists()) oldThumbnail.delete()
-            request.thumbnail.transferTo(oldThumbnail)
+            val oldThumbnailName = collectionDir.getThumbnailFileName()
+            if (oldThumbnailName != null) {
+                val oldThumbnail = File(collectionDir, oldThumbnailName)
+                if (oldThumbnail.exists()) oldThumbnail.delete()
+            }
+            val safeName = request.thumbnail.originalFilename?.let { Path.of(it).fileName.toString() }
+            val extension = safeName?.substringAfterLast('.', "jpg") ?: "jpg"
+            val newThumbnail = File(collectionDir, "thumbnail.$extension")
+            request.thumbnail.transferTo(newThumbnail)
             logger.info("Thumbnail updated for collection: $collectionId")
         }
     }
@@ -218,13 +226,16 @@ class ImageService(
      * @throws NoSuchElementException if collection does not exist
      */
     fun addCollectionImages(collectionId: String, images: List<MultipartFile>) {
-        val collectionDir = File(imagesDir, collectionId)
+        validateCollectionId(collectionId)
+        val collectionDir = validatePath(imagesDir, collectionId)
         if (!collectionDir.exists() || !collectionDir.isDirectory) {
-            logger.warn("Collection not found for collection(addImagesCollection): $collectionId")
+            logger.warn("Collection not found for adding images: $collectionId")
+            throw NoSuchElementException("Collection not found: $collectionId")
         }
         val existingCount = collectionDir.getImageFileNames().size
         images.forEachIndexed { index, file ->
-            val extension = file.originalFilename?.substringAfterLast('.', "jpg") ?: "jpg"
+            val safeName = file.originalFilename?.let { Path.of(it).fileName.toString() }
+            val extension = safeName?.substringAfterLast('.', "jpg") ?: "jpg"
             val newName = "%03d.%s".format(existingCount + 1 + index, extension)
             file.transferTo(File(collectionDir, newName))
         }
