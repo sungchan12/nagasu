@@ -8,5 +8,7 @@ fun toSlug(title: String): String {
 }
 
 fun validateCollectionId(collectionId: String) {
-    require(collectionId.matches(Regex("^[a-zA-Z0-9가-힣_-]+$")))
+    require(collectionId.matches(Regex("^[a-zA-Z0-9가-힣_-]+$"))) {
+        "Invalid collection ID: '$collectionId'. Only alphanumeric, Korean, hyphen(-), and underscore(_) characters are allowed."
+    }
 }
