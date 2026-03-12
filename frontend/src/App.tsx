@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Sidebar } from './components/Sidebar';
 import { CollectionList } from './pages/CollectionList';
 import { CollectionDetail } from './pages/CollectionDetail';
 import { UploadCollection } from './pages/UploadCollection';
@@ -7,10 +8,10 @@ import { VideoDetail } from './pages/VideoDetail';
 import { VideoUpload } from './pages/VideoUpload';
 import './App.css';
 
-type Page = 'list' | 'detail' | 'upload' | 'video-list' | 'video-detail' | 'video-upload';
+type Page = 'list' | 'detail' | 'upload' | 'video-list' | 'video-detail' | 'video-upload' | 'most-viewed' | 'image-most-viewed';
 
 function App() {
-  const [page, setPage] = useState<Page>('list');
+  const [page, setPage] = useState<Page>('video-list');
   const [selectedCollectionId, setSelectedCollectionId] = useState<string | null>(null);
   const [selectedVideoId, setSelectedVideoId] = useState<string | null>(null);
 
@@ -43,46 +44,64 @@ function App() {
     setPage('video-list');
   };
 
+  const handleNavigate = (target: Page) => {
+    setSelectedCollectionId(null);
+    setSelectedVideoId(null);
+    setPage(target);
+  };
+
   return (
     <div className="app">
-      {page === 'detail' && selectedCollectionId && (
-        <CollectionDetail
-          collectionId={selectedCollectionId}
-          onBack={handleBack}
-        />
-      )}
-      {page === 'upload' && (
-        <UploadCollection
-          onBack={handleBack}
-          onSuccess={handleUploadSuccess}
-        />
-      )}
-      {page === 'video-list' && (
-        <VideoList
-          onSelectVideo={handleSelectVideo}
-          onBack={handleBack}
-          onUploadClick={() => setPage('video-upload')}
-        />
-      )}
-      {page === 'video-upload' && (
-        <VideoUpload
-          onBack={handleVideoListBack}
-          onSuccess={handleVideoUploadSuccess}
-        />
-      )}
-      {page === 'video-detail' && selectedVideoId && (
-        <VideoDetail
-          videoId={selectedVideoId}
-          onBack={handleVideoListBack}
-        />
-      )}
-      {page === 'list' && (
-        <CollectionList
-          onSelectCollection={handleSelectCollection}
-          onUploadClick={() => setPage('upload')}
-          onVideoClick={() => setPage('video-list')}
-        />
-      )}
+      <Sidebar currentPage={page} onNavigate={handleNavigate} />
+      <main className="app-content">
+        {page === 'detail' && selectedCollectionId && (
+          <CollectionDetail
+            collectionId={selectedCollectionId}
+            onBack={handleBack}
+          />
+        )}
+        {page === 'upload' && (
+          <UploadCollection
+            onBack={handleBack}
+            onSuccess={handleUploadSuccess}
+          />
+        )}
+        {page === 'video-list' && (
+          <VideoList
+            onSelectVideo={handleSelectVideo}
+            onBack={handleBack}
+            onUploadClick={() => setPage('video-upload')}
+          />
+        )}
+        {page === 'most-viewed' && (
+          <VideoList
+            onSelectVideo={handleSelectVideo}
+            onBack={handleBack}
+            onUploadClick={() => setPage('video-upload')}
+            sort="viewCount"
+            order="desc"
+          />
+        )}
+        {page === 'video-upload' && (
+          <VideoUpload
+            onBack={handleVideoListBack}
+            onSuccess={handleVideoUploadSuccess}
+          />
+        )}
+        {page === 'video-detail' && selectedVideoId && (
+          <VideoDetail
+            videoId={selectedVideoId}
+            onBack={handleVideoListBack}
+          />
+        )}
+        {page === 'list' && (
+          <CollectionList
+            onSelectCollection={handleSelectCollection}
+            onUploadClick={() => setPage('upload')}
+            onVideoClick={() => setPage('video-list')}
+          />
+        )}
+      </main>
     </div>
   );
 }

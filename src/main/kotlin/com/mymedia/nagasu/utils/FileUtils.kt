@@ -3,6 +3,7 @@ package com.mymedia.nagasu.utils
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.mymedia.nagasu.dto.metadata.CollectionMetadata
+import org.slf4j.LoggerFactory
 import java.io.File
 
 private val objectMapper = jacksonObjectMapper()
@@ -38,13 +39,41 @@ fun File.countVideoFiles(): Int {
     return this.walkTopDown().count { it.isVideoFile() }
 }
 
-fun File.getMetaData(): CollectionMetadata {
+fun File.getMetaData(): CollectionMetadata? {
     val metadataFile = File(this, "metadata.json")
-    require(metadataFile.exists()) { "metadata file does not exist." }
-    return objectMapper.readValue<CollectionMetadata>(metadataFile)
+    if (!metadataFile.exists()) return null
+    return try {
+        objectMapper.readValue<CollectionMetadata>(metadataFile)
+    } catch (e: Exception) {
+        LoggerFactory
+            .getLogger("FileUtils")
+            .warn("metadata parsing incomplete: ${this.absolutePath}/metadata.json - ${e.message}")
+        null
+    }
 }
 
 fun File.saveMetaData(metadata: CollectionMetadata) {
     val metadataFile = File(this, "metadata.json")
     objectMapper.writeValue(metadataFile, metadata)
+}
+
+fun File.incrementViewCount() {
+    val metadata = this.getMetaData() ?: return
+    this.saveMetaData(metadata.copy(viewCount = metadata.viewCount + 1))
+}
+
+/**
+ * Prevents Path Traversal by verifying the canonicalized path stays within basePath.
+ * @param basePath The allowed root directory
+ * @param userInput User-provided path segment (e.g. collectionId)
+ * @return The validated canonical path
+ * @throws IllegalArgumentException If the resolved path escapes basePath
+ */
+fun validatePath(basePath: File, userInput: String): File {
+    val resolved = File(basePath, userInput).canonicalFile
+    val base = basePath.canonicalFile
+    require(resolved.path.startsWith(base.path + File.separator) || resolved == base) {
+        "Invalid path: access denied"
+    }
+    return resolved
 }

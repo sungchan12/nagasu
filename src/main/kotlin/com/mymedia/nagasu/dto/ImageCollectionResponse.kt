@@ -9,5 +9,6 @@ data class ImageCollectionResponse(
     val title: String,
     val artist: String,
     val tags: List<String>,
-    val thumbnailUrl: String
+    val thumbnailUrl: String,
+    val viewCount: Int
 )

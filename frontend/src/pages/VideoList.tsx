@@ -4,15 +4,17 @@ import { VideoCard } from '../components/VideoCard';
 import type { VideoCollection } from '../types';
 import './VideoList.css';
 
-const API_BASE = 'http://localhost:8080';
+const API_BASE = '';
 
 type Props = {
   onSelectVideo: (id: string) => void;
   onBack: () => void;
   onUploadClick: () => void;
+  sort?: string;
+  order?: string;
 };
 
-export function VideoList({ onSelectVideo, onBack, onUploadClick }: Props) {
+export function VideoList({ onSelectVideo, onBack, onUploadClick, sort, order }: Props) {
   const [videos, setVideos] = useState<VideoCollection[]>([]);
   const [filteredVideos, setFilteredVideos] = useState<VideoCollection[]>([]);
   const [loading, setLoading] = useState(true);
@@ -22,7 +24,11 @@ export function VideoList({ onSelectVideo, onBack, onUploadClick }: Props) {
     const fetchVideos = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`${API_BASE}/api/videos`);
+        const params = new URLSearchParams();
+        if (sort) params.set('sort', sort);
+        if (order) params.set('order', order);
+        const query = params.toString();
+        const response = await fetch(`${API_BASE}/api/videos${query ? `?${query}` : ''}`);
         if (!response.ok) throw new Error('Failed to fetch videos');
         const data = await response.json();
         setVideos(data);
@@ -35,7 +41,7 @@ export function VideoList({ onSelectVideo, onBack, onUploadClick }: Props) {
     };
 
     fetchVideos();
-  }, []);
+  }, [sort, order]);
 
   const handleSearch = (query: string) => {
     if (!query.trim()) {
@@ -57,32 +63,29 @@ export function VideoList({ onSelectVideo, onBack, onUploadClick }: Props) {
     onSelectVideo(video.id);
   };
 
-  if (loading) return <div className="loading">Loading...</div>;
-  if (error) return <div className="error">Error: {error}</div>;
-
   return (
     <div className="video-list-page">
       <div className="list-header">
-        <button className="back-button" onClick={onBack}>
-          &larr; Back
-        </button>
+        <button className="back-button" onClick={onBack}>Back</button>
         <SearchBar onSearch={handleSearch} />
-        <button className="upload-button" onClick={onUploadClick}>
-          + Upload
-        </button>
+        <button className="upload-button" onClick={onUploadClick}>Upload</button>
       </div>
-      <div className="video-list">
-        {filteredVideos.map((video) => (
-          <VideoCard
-            key={video.id}
-            video={video}
-            onClick={handleVideoClick}
-          />
-        ))}
-        {filteredVideos.length === 0 && (
-          <div className="no-results">No videos found</div>
-        )}
-      </div>
+      {loading && <div className="loading">Loading...</div>}
+      {error && <div className="error">Error: {error}</div>}
+      {!loading && !error && (
+        <div className="video-list">
+          {filteredVideos.map((video) => (
+            <VideoCard
+              key={video.id}
+              video={video}
+              onClick={handleVideoClick}
+            />
+          ))}
+          {filteredVideos.length === 0 && (
+            <div className="no-results">No videos found</div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

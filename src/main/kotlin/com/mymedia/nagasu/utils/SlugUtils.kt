@@ -6,3 +6,7 @@ fun toSlug(title: String): String {
         .replace(Regex("\\s+"), "_")
         .replace(Regex("[^a-zA-Z0-9가-힣_-]"), "")
 }
+
+fun validateCollectionId(collectionId: String) {
+    require(collectionId.matches(Regex("^[a-zA-Z0-9가-힣_-]+$")))
+}

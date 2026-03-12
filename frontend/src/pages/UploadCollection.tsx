@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import './UploadCollection.css';
 
-const API_BASE = 'http://localhost:8080';
+const API_BASE = '';
 
 type Props = {
   onBack: () => void;
@@ -78,8 +78,8 @@ export function UploadCollection({ onBack, onSuccess }: Props) {
 
       const result = await response.json();
 
-      if (!response.ok || !result.status) {
-        throw new Error(result.message || 'Upload failed');
+      if (!response.ok || result.error) {
+        throw new Error(result.error || 'Upload failed');
       }
 
       onSuccess();

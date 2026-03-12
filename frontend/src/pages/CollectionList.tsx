@@ -4,7 +4,7 @@ import { CollectionCard } from '../components/CollectionCard';
 import type { ImageCollection } from '../types';
 import './CollectionList.css';
 
-const API_BASE = 'http://localhost:8080';
+const API_BASE = '';
 
 type Props = {
   onSelectCollection: (id: string) => void;
@@ -64,12 +64,6 @@ export function CollectionList({ onSelectCollection, onUploadClick, onVideoClick
     <div className="collection-list-page">
       <div className="list-header">
         <SearchBar onSearch={handleSearch} />
-        <button className="video-button" onClick={onVideoClick}>
-          Videos
-        </button>
-        <button className="upload-button" onClick={onUploadClick}>
-          + Upload
-        </button>
       </div>
       <div className="collection-list">
         {filteredCollections.map((collection) => (
