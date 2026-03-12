@@ -17,6 +17,8 @@ import com.mymedia.nagasu.utils.isImageFile
 import com.mymedia.nagasu.utils.isVideoFile
 import com.mymedia.nagasu.utils.saveMetaData
 import com.mymedia.nagasu.utils.toSlug
+import com.mymedia.nagasu.utils.validateCollectionId
+import com.mymedia.nagasu.utils.validatePath
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import java.io.File
@@ -85,7 +87,8 @@ class VideoService(
      */
     fun getVideoCollectionDetails(collectionId: String): VideoDetailsResponse {
         return try {
-            val videoColDir = File(videoDir, collectionId)
+            validateCollectionId(collectionId)
+            val videoColDir = validatePath(videoDir, collectionId)
             videoDir.ensureExists()
 
             if (!videoColDir.exists() || !videoColDir.isDirectory) {
@@ -109,7 +112,7 @@ class VideoService(
                 thumbnailUrl = thumbnailUrl,
                 videoUrl = videoUrl,
                 videoSubtitleUrl = videoSubtitleUrl,
-                viewCount = videoColDir.getMetaData()?.viewCount ?: 0
+                viewCount = metadata?.viewCount ?: 0
             )
         } catch (e: NoSuchElementException) {
             logger.warn("Collection not found: $collectionId")
@@ -136,12 +139,19 @@ class VideoService(
         videoDir.ensureExists()
 
         // Extract baseName from filename and slugify as collectionId
-        val originalFileName = Path.of(videoUploadRequestDto.video.originalFilename
-            ?: throw IllegalArgumentException("Filename is missing")).fileName.toString()
+        val rawFilename = videoUploadRequestDto.video.originalFilename
+        if (rawFilename.isNullOrBlank()) {
+            throw IllegalArgumentException("Filename is missing or blank")
+        }
+        val originalFileName = Path.of(rawFilename).fileName.toString()
         val baseName = originalFileName.substringBeforeLast('.')
         val collectionId = toSlug(baseName)
+        if (collectionId.isBlank()) {
+            throw IllegalArgumentException("Invalid filename: cannot generate collection ID")
+        }
+        validateCollectionId(collectionId)
 
-        val collectionDir = File(videoDir, collectionId)
+        val collectionDir = validatePath(videoDir, collectionId)
 
         // Reject upload if collectionId already exists
         if (collectionDir.exists()) {
@@ -221,9 +231,9 @@ class VideoService(
      * @throws IllegalStateException if deletion fails
      */
     fun deleteVideoCollection(collectionId: String) {
+        validateCollectionId(collectionId)
+        val collectionDir = validatePath(videoDir, collectionId)
         logger.info("Deleting video collection: $collectionId")
-        val collectionDir = File(videoDir, collectionId)
-
         if (!collectionDir.exists() || !collectionDir.isDirectory) {
             logger.warn("Collection not found for deletion: $collectionId")
             throw NoSuchElementException("Collection not found: $collectionId")
@@ -253,7 +263,8 @@ class VideoService(
      * @throws IllegalStateException if video file is missing and repair is impossible
      */
     fun repairVideoCollection(collectionId: String) {
-        val collectionDir = File(videoDir, collectionId)
+        validateCollectionId(collectionId)
+        val collectionDir = validatePath(videoDir, collectionId)
         if (!collectionDir.exists() || !collectionDir.isDirectory) {
             throw IllegalArgumentException("No Such Collection $collectionId")
         }
