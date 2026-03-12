@@ -24,7 +24,8 @@ export type VideoCollection = {
   title: string;
   artist: string;
   tags: string[];
-  thumbnailUrl: string;
+  thumbnailUrl: string | null;
+  viewCount: number;
 };
 
 export type VideoDetails = {
@@ -36,4 +37,5 @@ export type VideoDetails = {
   description: string;
   thumbnailUrl: string;
   videoUrl: string;
+  videoSubtitleUrl: string | null;
 };

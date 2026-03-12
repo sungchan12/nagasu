@@ -1,7 +1,7 @@
 import type { VideoCollection } from '../types';
 import './VideoCard.css';
 
-const API_BASE = 'http://localhost:8080';
+const API_BASE = '';
 
 interface VideoCardProps {
   video: VideoCollection;
@@ -13,7 +13,9 @@ export function VideoCard({ video, onClick }: VideoCardProps) {
     onClick?.(video);
   };
 
-  const thumbnailUrl = `${API_BASE}${video.thumbnailUrl}`;
+  const thumbnailUrl = video.thumbnailUrl
+    ? `${API_BASE}${video.thumbnailUrl}`
+    : '/placeholder.jpg';
 
   return (
     <div className="video-card" onClick={handleClick}>

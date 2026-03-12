@@ -1,0 +1,98 @@
+.sidebar {
+  width: 250px;
+  min-height: 100vh;
+  background-color: #ffffff; /* 화이트 배경 */
+  color: #333333;
+  display: flex;
+  flex-direction: column;
+  padding: 16px 0;
+  flex-shrink: 0;
+  border-right: 1px solid #e9ecef; /* 경계선 추가 */
+}
+
+.sidebar-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: #007bff; /* 로고 블루 포인트 */
+  padding: 0 20px 20px;
+  margin-bottom: 8px;
+  letter-spacing: -0.5px;
+}
+
+.sidebar-section-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 20px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #495057;
+  cursor: pointer;
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  transition: all 0.2s;
+}
+
+.sidebar-section-header:hover {
+  background-color: #f1f3f5;
+  color: #007bff;
+}
+
+.sidebar-section-header.active {
+  color: #007bff;
+  background-color: #e7f1ff; /* 활성화 시 연한 블루 배경 */
+}
+
+.sidebar-sub-items {
+  padding-left: 50px;
+  margin-bottom: 10px;
+}
+
+.sidebar-sub-item {
+  display: block;
+  width: 100%;
+  padding: 8px 0;
+  font-size: 14px;
+  color: #6c757d;
+  cursor: pointer;
+  background: none;
+  border: none;
+  text-align: left;
+  transition: color 0.2s;
+}
+
+.sidebar-sub-item:hover {
+  color: #007bff;
+}
+
+.sidebar-sub-item.active {
+  color: #007bff;
+  font-weight: 700;
+}
+
+.sidebar-upload-btn {
+  margin: 10px 20px;
+  padding: 12px;
+  border-radius: 8px;
+  background-color: #007bff; /* 업로드 버튼 블루 */
+  color: white;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+
+.sidebar-upload-btn:hover {
+  background-color: #0056b3;
+}
+
+.sidebar-upload-icon {
+  font-size: 16px;
+  width: 20px;
+  text-align: center;
+}

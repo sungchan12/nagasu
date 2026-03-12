@@ -7,5 +7,6 @@ data class CollectionMetadata(
     val title: String,
     val artist: String = "",
     val tags: List<String> = emptyList(),
-    val description: String = ""
+    val description: String = "",
+    val viewCount: Int = 0
 )

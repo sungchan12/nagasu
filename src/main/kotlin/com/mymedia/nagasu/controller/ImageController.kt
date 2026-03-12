@@ -1,22 +1,26 @@
 package com.mymedia.nagasu.controller
 
+import com.mymedia.nagasu.dto.ApiResponse
 import com.mymedia.nagasu.dto.ImageCollectionResponse
 import com.mymedia.nagasu.dto.ImageDetailsResponse
+import com.mymedia.nagasu.dto.ImageUpdateDto
 import com.mymedia.nagasu.dto.ImageUploadDto
-import com.mymedia.nagasu.dto.ImageUploadResponse
 import com.mymedia.nagasu.service.ImageService
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.ModelAttribute
+import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.multipart.MultipartFile
 
 /**
- * 이미지 컬렉션 API 컨트롤러
+ * Image collection API controller
  */
 @RestController
 @RequestMapping("/api/images")
@@ -24,43 +28,61 @@ class ImageController(
     private val imageService: ImageService
 ) {
     /**
-     * 이미지 컬렉션 목록을 조회한다.
+     * Returns all image collections.
      */
     @GetMapping
-    fun getCollections(): List<ImageCollectionResponse> {
-        return imageService.getCollections()
+    fun getCollections(
+        @RequestParam(defaultValue = "title") sort: String,
+        @RequestParam(defaultValue = "asc") order: String): List<ImageCollectionResponse> {
+        return imageService.getCollections(sort, order)
     }
 
     /**
-     * 컬렉션 상세 정보를 조회한다.
+     * Returns collection details.
      */
     @GetMapping("/{collectionId}/details")
     fun getCollectionDetails(@PathVariable collectionId: String): ResponseEntity<ImageDetailsResponse> {
         val details = imageService.getCollectionDetails(collectionId)
-            ?: return ResponseEntity.notFound().build()
-
         return ResponseEntity.ok(details)
     }
 
-    @PostMapping(consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
-    fun createCollection(
-        @ModelAttribute requestDto: ImageUploadDto
-    ): ResponseEntity<ImageUploadResponse> {
-        // Service에 DTO 전체를 넘깁니다.
-        val result = imageService.createCollection(requestDto)
-        return ResponseEntity.ok(result)
-    }
     /**
-     * 컬렉션을 삭제한다.
+     * Creates a new image collection.
+     */
+    @PostMapping(consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
+    fun createCollection(@ModelAttribute requestDto: ImageUploadDto): ResponseEntity<ApiResponse<String>> {
+        val result = imageService.createCollection(requestDto)
+        return ResponseEntity.ok(ApiResponse.Success(result))
+    }
+
+    /**
+     * Adds images to an existing collection.
+     */
+    @PostMapping("/{collectionId}/images", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
+    fun addCollectionImages(
+        @PathVariable collectionId: String,
+        @RequestParam("images") images: List<MultipartFile>): ResponseEntity<ApiResponse<String>> {
+        imageService.addCollectionImages(collectionId, images)
+        return ResponseEntity.ok(ApiResponse.Success("Collection added ${images.size} images"))
+    }
+
+    /**
+     * Deletes a collection.
      */
     @DeleteMapping("/{collectionId}")
-    fun deleteCollection(@PathVariable collectionId: String): ResponseEntity<Map<String, Any>> {
-        val success = imageService.deleteCollection(collectionId)
+    fun deleteCollection(@PathVariable collectionId: String): ResponseEntity<ApiResponse<String>> {
+        imageService.deleteCollection(collectionId)
+        return ResponseEntity.ok(ApiResponse.Success("Collection deleted Successfully!"))
+    }
 
-        return if (success) {
-            ResponseEntity.ok(mapOf("success" to true, "message" to "Collection deleted successfully"))
-        } else {
-            ResponseEntity.notFound().build()
-        }
+    /**
+     * Updates collection metadata and thumbnail.
+     */
+    @PatchMapping("/{collectionId}", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
+    fun updateCollection(
+        @ModelAttribute imageUpdateRequest: ImageUpdateDto,
+        @PathVariable collectionId: String): ResponseEntity<ApiResponse<String>> {
+        imageService.updateCollectionMetaData(collectionId, imageUpdateRequest)
+        return ResponseEntity.ok(ApiResponse.Success("Collection Updated Successfully!"))
     }
 }
