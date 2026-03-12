@@ -33,7 +33,7 @@ class ImageController(
     @GetMapping
     fun getCollections(
         @RequestParam(defaultValue = "title") sort: String,
-        @RequestParam(defaultValue = "view") order: String): List<ImageCollectionResponse> {
+        @RequestParam(defaultValue = "asc") order: String): List<ImageCollectionResponse> {
         return imageService.getCollections(sort, order)
     }
 

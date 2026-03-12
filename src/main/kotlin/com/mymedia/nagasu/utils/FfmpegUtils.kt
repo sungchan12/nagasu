@@ -35,14 +35,22 @@ fun extractThumbnail(videoFile: File, outputFile: File, timeSeconds: Int = 1): B
             .start()
         val output = process.inputStream.bufferedReader().readText()
         val completed = process.waitFor(30, TimeUnit.SECONDS)
+        if (!completed) {
+            process.destroyForcibly()
+            ffmpegLogger.warn("FFmpeg thumbnail extraction timed out")
+            if (outputFile.exists()) outputFile.delete()
+            return false
+        }
         val exitCode = process.exitValue()
-        if (!completed || exitCode != 0) {
+        if (exitCode != 0) {
             ffmpegLogger.warn("FFmpeg thumbnail extraction failed (exitCode=$exitCode):\n$output")
+            if (outputFile.exists()) outputFile.delete()
             return false
         }
         true
     } catch (e: Exception) {
         ffmpegLogger.error("FFmpeg execution error: ${e.message}", e)
+        if (outputFile.exists()) outputFile.delete()
         false
     }
 }
@@ -79,7 +87,7 @@ fun convertToVtt(subtitle: File, outputFile: File, timeoutSeconds: Long = 60): F
         val process = ProcessBuilder(command).redirectErrorStream(true).start()
         process.inputStream.bufferedReader().use { reader ->
             reader.forEachLine { line ->
-                println("[FFmpeg] $line")
+                ffmpegLogger.debug("[FFmpeg] $line")
             }
         }
         val completed = process.waitFor(timeoutSeconds, TimeUnit.SECONDS)
