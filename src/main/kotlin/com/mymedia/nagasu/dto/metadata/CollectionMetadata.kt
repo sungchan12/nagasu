@@ -1,12 +1,12 @@
-package com.mymedia.nagasu.dto.metadata
-
-/**
- * metadata.json 파싱용 데이터 클래스
- */
-data class CollectionMetadata(
-    val title: String,
-    val artist: String = "",
-    val tags: List<String> = emptyList(),
-    val description: String = "",
-    val viewCount: Int = 0
-)
+// package com.mymedia.nagasu.dto.metadata
+//
+// /**
+//  * metadata.json 파싱용 데이터 클래스
+//  */
+// data class CollectionMetadata(
+//     val title: String,
+//     val artist: String = "",
+//     val tags: List<String> = emptyList(),
+//     val description: String = "",
+//     val viewCount: Int = 0
+// )
