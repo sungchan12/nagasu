@@ -25,8 +25,15 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(NoSuchElementException.class)
     public ResponseEntity<ApiResponse<?>> handleIllegalStateException(IllegalStateException e) {
-        logger.warn("StateException: {}", e.getMessage());
-        var errorBody = new ApiResponse.Failure(e.getMessage() != null ? e.getMessage() :  "An internal error occurred");
+        logger.warn("Element not Found: {}", e.getMessage());
+        var errorBody = new ApiResponse.Failure(e.getMessage() != null ? e.getMessage() :  "Element Not Found");
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorBody);
+    }
+
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<ApiResponse<?>> handleIllegalStateException(IllegalStateException e) {
+        logger.warn("StateException: {}", e.getMessage());
+        var errorBody = new ApiResponse.Failure(e.getMessage() != null ? e.getMessage() : "An internal error occurred");
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorBody);
     }
 }
