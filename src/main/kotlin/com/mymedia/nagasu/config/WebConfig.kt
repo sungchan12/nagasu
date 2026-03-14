@@ -1,3 +1,4 @@
+/*
 package com.mymedia.nagasu.config
 
 import org.springframework.beans.factory.annotation.Value
@@ -24,3 +25,4 @@ class WebConfig(
             .addResourceLocations("file:$storagePath/")
     }
 }
+*/
