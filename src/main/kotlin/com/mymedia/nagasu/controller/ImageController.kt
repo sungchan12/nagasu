@@ -1,3 +1,4 @@
+/*
 package com.mymedia.nagasu.controller
 
 import com.mymedia.nagasu.dto.ApiResponse
@@ -19,17 +20,17 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
 
-/**
+/ **
  * Image collection API controller
- */
+ * /
 @RestController
 @RequestMapping("/api/images")
 class ImageController(
     private val imageService: ImageService
 ) {
-    /**
+    / **
      * Returns all image collections.
-     */
+     * /
     @GetMapping
     fun getCollections(
         @RequestParam(defaultValue = "title") sort: String,
@@ -37,27 +38,27 @@ class ImageController(
         return imageService.getCollections(sort, order)
     }
 
-    /**
+    / **
      * Returns collection details.
-     */
+     * /
     @GetMapping("/{collectionId}/details")
     fun getCollectionDetails(@PathVariable collectionId: String): ResponseEntity<ImageDetailsResponse> {
         val details = imageService.getCollectionDetails(collectionId)
         return ResponseEntity.ok(details)
     }
 
-    /**
+    / **
      * Creates a new image collection.
-     */
+     * /
     @PostMapping(consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     fun createCollection(@ModelAttribute requestDto: ImageUploadDto): ResponseEntity<ApiResponse<String>> {
         val result = imageService.createCollection(requestDto)
         return ResponseEntity.ok(ApiResponse.Success(result))
     }
 
-    /**
+    / **
      * Adds images to an existing collection.
-     */
+     * /
     @PostMapping("/{collectionId}/images", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     fun addCollectionImages(
         @PathVariable collectionId: String,
@@ -66,18 +67,18 @@ class ImageController(
         return ResponseEntity.ok(ApiResponse.Success("Collection added ${images.size} images"))
     }
 
-    /**
+    / **
      * Deletes a collection.
-     */
+     * /
     @DeleteMapping("/{collectionId}")
     fun deleteCollection(@PathVariable collectionId: String): ResponseEntity<ApiResponse<String>> {
         imageService.deleteCollection(collectionId)
         return ResponseEntity.ok(ApiResponse.Success("Collection deleted Successfully!"))
     }
 
-    /**
+    / **
      * Updates collection metadata and thumbnail.
-     */
+     * /
     @PatchMapping("/{collectionId}", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     fun updateCollection(
         @ModelAttribute imageUpdateRequest: ImageUpdateDto,
@@ -86,3 +87,4 @@ class ImageController(
         return ResponseEntity.ok(ApiResponse.Success("Collection Updated Successfully!"))
     }
 }
+*/

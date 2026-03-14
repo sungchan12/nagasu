@@ -1,3 +1,4 @@
+/*
 package com.mymedia.nagasu.config
 
 import com.mymedia.nagasu.dto.ApiResponse
@@ -48,3 +49,4 @@ class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorBody)
     }
 }
+*/

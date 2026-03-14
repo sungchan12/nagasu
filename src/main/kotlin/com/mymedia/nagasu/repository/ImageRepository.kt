@@ -1,3 +1,4 @@
+/*
 package com.mymedia.nagasu.repository
 
 import com.mymedia.nagasu.utils.isImageFile
@@ -21,3 +22,4 @@ fun File.getThumbnailFileName(): String? {
         ?.minByOrNull { it.name }
         ?.name
 }
+*/

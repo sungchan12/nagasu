@@ -1,3 +1,4 @@
+/*
 package com.mymedia.nagasu.utils
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
@@ -8,10 +9,10 @@ import java.io.File
 
 private val objectMapper = jacksonObjectMapper()
 
-/**
+/ **
  * 디렉토리가 존재하지 않으면 생성한다.
  * @return 디렉토리가 존재하거나 성공적으로 생성되면 true
- */
+ * /
 fun File.ensureExists(): Boolean {
     return this.exists() || this.mkdirs()
 }
@@ -62,13 +63,13 @@ fun File.incrementViewCount() {
     this.saveMetaData(metadata.copy(viewCount = metadata.viewCount + 1))
 }
 
-/**
+/ **
  * Prevents Path Traversal by verifying the canonicalized path stays within basePath.
  * @param basePath The allowed root directory
  * @param userInput User-provided path segment (e.g. collectionId)
  * @return The validated canonical path
  * @throws IllegalArgumentException If the resolved path escapes basePath
- */
+ * /
 fun validatePath(basePath: File, userInput: String): File {
     val resolved = File(basePath, userInput).canonicalFile
     val base = basePath.canonicalFile
@@ -77,3 +78,4 @@ fun validatePath(basePath: File, userInput: String): File {
     }
     return resolved
 }
+*/
