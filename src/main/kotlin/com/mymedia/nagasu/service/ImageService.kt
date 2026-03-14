@@ -1,3 +1,4 @@
+/*
 package com.mymedia.nagasu.service
 
 import com.mymedia.nagasu.dto.ImageCollectionResponse
@@ -23,19 +24,19 @@ import org.springframework.web.multipart.MultipartFile
 import java.io.File
 import java.nio.file.Path
 
-/**
+/ **
  * Image collection management service
- */
+ * /
 @Service
 class ImageService(
     @Value("\${storage.path}")
     private val storagePath: String) {
     private val imagesDir = File(storagePath, "images")
     private val logger = LoggerFactory.getLogger(ImageService::class.java)
-    /**
+    / **
      * Returns all image collections.
      * Skips collections that fail to load.
-     */
+     * /
     fun getCollections(sort: String, order: String): List<ImageCollectionResponse> {
         imagesDir.ensureExists()
         val list = imagesDir.getCollectionDirs().mapNotNull {
@@ -66,16 +67,16 @@ class ImageService(
         return if (order == "desc") sorted.reversed() else sorted
     }
 
-    /** Generates thumbnail URL for the given collection. */
+    / ** Generates thumbnail URL for the given collection. * /
     private fun getThumbnailUrl(collectionId: String, collectionDir: File): String {
         val thumbnailName = collectionDir.getThumbnailFileName()
         return "/storage/images/$collectionId/$thumbnailName"
     }
 
-    /**
+    / **
      * Returns image collection details.
      * @throws NoSuchElementException if collection does not exist
-     */
+     * /
     fun getCollectionDetails(collectionId: String): ImageDetailsResponse {
         validateCollectionId(collectionId)
         val collectionDir = validatePath(imagesDir, collectionId)
@@ -100,12 +101,12 @@ class ImageService(
         )
     }
 
-    /**
+    / **
      * Creates a new image collection.
      * Rolls back created folder on failure.
      * @return created collectionId
      * @throws IllegalStateException if collectionId already exists
-     */
+     * /
     fun createCollection(request: ImageUploadDto): String {
         logger.info("Images upload started: title=${request.title}")
         imagesDir.ensureExists()
@@ -162,11 +163,11 @@ class ImageService(
         }
     }
 
-    /**
+    / **
      * Deletes an image collection.
      * @throws NoSuchElementException if collection does not exist
      * @throws IllegalStateException if deletion fails
-     */
+     * /
     fun deleteCollection(collectionId: String) {
         validateCollectionId(collectionId)
         val collectionDir = validatePath(imagesDir, collectionId)
@@ -184,10 +185,10 @@ class ImageService(
         logger.info("Collection deleted: $collectionId")
     }
 
-    /**
+    / **
      * Updates collection metadata and optionally replaces the thumbnail.
      * @throws NoSuchElementException if collection or metadata does not exist
-     */
+     * /
     fun updateCollectionMetaData(collectionId: String, request: ImageUpdateDto) {
         validateCollectionId(collectionId)
         val collectionDir = validatePath(imagesDir, collectionId)
@@ -219,11 +220,11 @@ class ImageService(
         }
     }
 
-    /**
+    / **
      * Adds images to an existing collection.
      * New images are numbered sequentially after existing ones.
      * @throws NoSuchElementException if collection does not exist
-     */
+     * /
     fun addCollectionImages(collectionId: String, images: List<MultipartFile>) {
         validateCollectionId(collectionId)
         val collectionDir = validatePath(imagesDir, collectionId)
@@ -241,3 +242,4 @@ class ImageService(
         logger.info("Added ${images.size} images to collection: $collectionId")
     }
 }
+*/

@@ -1,3 +1,4 @@
+/*
 package com.mymedia.nagasu.service
 
 import com.mymedia.nagasu.dto.VideoCollectionResponse
@@ -25,29 +26,29 @@ import java.io.File
 import org.slf4j.LoggerFactory
 import java.nio.file.Path
 
-/**
+/ **
  * Video collection management service
  *
  * Video files are stored in the following structure:
  * {storagePath}/videos/{collectionId}/
- *   ├── {originalFileName}.mp4   (original video)
- *   ├── {baseName}.srt           (original subtitle, optional)
- *   ├── {baseName}.vtt           (converted subtitle, optional)
- *   ├── thumbnail.jpg            (thumbnail)
- *   └── metadata.json            (metadata)
+ *   +-- {originalFileName}.mp4   (original video)
+ *   +-- {baseName}.srt           (original subtitle, optional)
+ *   +-- {baseName}.vtt           (converted subtitle, optional)
+ *   +-- thumbnail.jpg            (thumbnail)
+ *   +-- metadata.json            (metadata)
  *
  * collectionId is a slugified version of the video file's baseName.
- */
+ * /
 @Service
 class VideoService(
     @Value("\${storage.path}") private val storagePath: String) {
     private val videoDir = File(storagePath, "videos")
     private val logger = LoggerFactory.getLogger(VideoService::class.java)
 
-    /**
+    / **
      * Returns all video collections.
      * Skips collections that fail to load.
-     */
+     * /
     fun getVideoCollection(sort: String, order: String): List<VideoCollectionResponse> {
         videoDir.ensureExists()
         val list = videoDir.getVideoCollection()
@@ -79,12 +80,12 @@ class VideoService(
         } else sorted
     }
 
-    /**
+    / **
      * Returns video collection details.
      * @param collectionId slugified collection folder name
      * @throws NoSuchElementException if collection does not exist
      * @throws IllegalStateException if thumbnail or video file is missing
-     */
+     * /
     fun getVideoCollectionDetails(collectionId: String): VideoDetailsResponse {
         return try {
             validateCollectionId(collectionId)
@@ -126,14 +127,14 @@ class VideoService(
         }
     }
 
-    /**
+    / **
      * Uploads a video collection.
      * Slugifies the file's baseName to use as collectionId (folder name).
      * Rolls back created folder on failure.
      * @return created collectionId
      * @throws IllegalArgumentException if filename is missing
      * @throws IllegalStateException if collectionId already exists
-     */
+     * /
     fun uploadVideoCollection(videoUploadRequestDto: VideoUploadRequestDto): String {
         logger.info("Video upload started: title=${videoUploadRequestDto.title}")
         videoDir.ensureExists()
@@ -225,11 +226,11 @@ class VideoService(
         }
     }
 
-    /**
+    / **
      * Deletes an entire video collection folder.
      * @throws NoSuchElementException if collection does not exist
      * @throws IllegalStateException if deletion fails
-     */
+     * /
     fun deleteVideoCollection(collectionId: String) {
         validateCollectionId(collectionId)
         val collectionDir = validatePath(videoDir, collectionId)
@@ -247,8 +248,8 @@ class VideoService(
 
         logger.info("Video collection deleted: $collectionId")
     }
-    
-    /**
+
+    / **
      * Repairs a manually added video collection.
      *
      * Checks the following in order and auto-generates missing items:
@@ -261,7 +262,7 @@ class VideoService(
      * @param collectionId slugified collection folder name
      * @throws NoSuchElementException if collection folder does not exist
      * @throws IllegalStateException if video file is missing and repair is impossible
-     */
+     * /
     fun repairVideoCollection(collectionId: String) {
         validateCollectionId(collectionId)
         val collectionDir = validatePath(videoDir, collectionId)
@@ -306,3 +307,4 @@ class VideoService(
         return "/storage/videos/${collectionDir.name}/$videoSubtitle"
     }
 }
+*/

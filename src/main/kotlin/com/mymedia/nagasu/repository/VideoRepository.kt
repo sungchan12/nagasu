@@ -1,3 +1,4 @@
+/*
 package com.mymedia.nagasu.repository
 
 import com.mymedia.nagasu.utils.isVideoFile
@@ -18,3 +19,4 @@ fun File.getSubtitleFileName(): String? {
     return this.listFiles()?.find { it.extension.equals("vtt", true) }?.name
         ?: this.listFiles()?.firstOrNull{ it.isSubtitleFile() }?.name
 }
+*/

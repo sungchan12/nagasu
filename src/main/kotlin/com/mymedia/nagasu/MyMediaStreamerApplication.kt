@@ -1,3 +1,4 @@
+/*
 package com.mymedia.nagasu
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
@@ -9,3 +10,4 @@ class MyMediaStreamerApplication
 fun main(args: Array<String>) {
 	runApplication<MyMediaStreamerApplication>(*args)
 }
+*/

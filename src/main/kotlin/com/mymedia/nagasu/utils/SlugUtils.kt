@@ -1,3 +1,4 @@
+/*
 package com.mymedia.nagasu.utils
 
 fun toSlug(title: String): String {
@@ -12,3 +13,4 @@ fun validateCollectionId(collectionId: String) {
         "Invalid collection ID: '$collectionId'. Only alphanumeric, Korean, hyphen(-), and underscore(_) characters are allowed."
     }
 }
+*/
