@@ -5,7 +5,9 @@ import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -13,8 +15,7 @@ public class FfmpegUtils {
 
     private static final Logger log = LoggerFactory.getLogger(FfmpegUtils.class);
 
-    private FfmpegUtils() {
-    }
+    private FfmpegUtils() {}
 
     /**
      * 비디오 파일에서 썸네일을 추출한다.
@@ -48,19 +49,19 @@ public class FfmpegUtils {
             if (!completed) {
                 process.destroyForcibly();
                 log.warn("FFmpeg thumbnail extraction timed out");
-                if (outputFile.exists()) outputFile.delete();
+                Files.deleteIfExists(outputFile.toPath());
                 return false;
             }
             var exitCode = process.exitValue();
             if (exitCode != 0) {
                 log.warn("FFmpeg thumbnail extraction failed (exitCode={}):\n{}", exitCode, output);
-                if (outputFile.exists()) outputFile.delete();
+                Files.deleteIfExists(outputFile.toPath());
                 return false;
             }
             return true;
         } catch (Exception e) {
             log.error("FFmpeg execution error: {}", e.getMessage(), e);
-            if (outputFile.exists()) outputFile.delete();
+            try { Files.deleteIfExists(outputFile.toPath()); } catch (IOException ex) { log.warn("Failed to clean up file: {}", outputFile.getAbsolutePath()); }
             return false;
         }
     }
@@ -113,10 +114,10 @@ public class FfmpegUtils {
             }
             return outputFile;
         } catch (RuntimeException e) {
-            if (outputFile.exists()) outputFile.delete();
+            try { Files.deleteIfExists(outputFile.toPath()); } catch (IOException ex) { log.warn("Failed to clean up file: {}", outputFile.getAbsolutePath()); }
             throw e;
         } catch (Exception e) {
-            if (outputFile.exists()) outputFile.delete();
+            try { Files.deleteIfExists(outputFile.toPath()); } catch (IOException ex) { log.warn("Failed to clean up file: {}", outputFile.getAbsolutePath()); }
             throw new RuntimeException(e);
         }
     }
