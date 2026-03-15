@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Set;
 
 public class FileUtils {
@@ -19,8 +20,12 @@ public class FileUtils {
 
     private FileUtils() {}
 
-    public static boolean ensureExists(File dir) {
-        return dir.exists() || dir.mkdirs();
+    public static void ensureExists(File dir) {
+        try {
+            Files.createDirectories(dir.toPath());
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to create directory: " + dir.getAbsolutePath(), e);
+        }
     }
 
     public static boolean isImageFile(File file) {
