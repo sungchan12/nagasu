@@ -16,7 +16,10 @@ public record CollectionMetadata(
         this(title, "", List.of(), "", 0);
     }
 
-    public CollectionMetadata(String title, String artist) {
-        this(title, artist, List.of(), "", 0);
+    public CollectionMetadata(String title, String artist, List<String> tags, String description) {
+        this(title, artist, tags, description, 0);
+    }
+    public CollectionMetadata viewCountIncrement() {
+        return new CollectionMetadata(title, artist, tags, description, viewCount + 1);
     }
 }

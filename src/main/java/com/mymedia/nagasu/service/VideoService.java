@@ -21,6 +21,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import static com.mymedia.nagasu.utils.FileUtils.*;
+
 @Service
 public class VideoService {
 
@@ -41,7 +43,7 @@ public class VideoService {
                     try {
                         var folder = new File(videoDir, folderName);
                         var thumbnailUrl = getThumbnailUrl(folder);
-                        var metadata = FileUtils.getMetaData(folder);
+                        var metadata = getMetaData(folder);
 
                         return new VideoCollectionResponse(
                                 folderName,
@@ -67,7 +69,6 @@ public class VideoService {
                     .sorted(Comparator.comparing(VideoCollectionResponse::title))
                     .toList();
         };
-
         if ("desc".equals(order)) {
             return sorted.reversed();
         }
@@ -87,8 +88,10 @@ public class VideoService {
                 throw new NoSuchElementException("Video collection not found: " + collectionId);
             }
 
-            FileUtils.incrementViewCount(videoColDir);
-            var metadata = FileUtils.getMetaData(videoColDir);
+            var metadata = getMetaData(videoColDir);
+            if (metadata != null) {
+                saveMetaData(videoColDir, metadata.viewCountIncrement());
+            }
             var thumbnailUrl = getThumbnailUrl(videoColDir);
             if (thumbnailUrl == null) {
                 throw new IllegalStateException("Thumbnail not found: " + collectionId);
@@ -196,7 +199,8 @@ public class VideoService {
                     videoUploadRequestDto.title(),
                     videoUploadRequestDto.artist(),
                     videoUploadRequestDto.tags(),
-                    videoUploadRequestDto.description() != null ? videoUploadRequestDto.description() : ""
+                    videoUploadRequestDto.description() != null
+                            ? videoUploadRequestDto.description() : ""
             );
             FileUtils.saveMetaData(collectionDir, metadata);
             logger.info("Video upload successful: collectionId={}", collectionId);
@@ -254,7 +258,7 @@ public class VideoService {
                 .findFirst()
                 .orElseThrow(() -> new NoSuchElementException("No Such Video " + collectionId));
 
-        if (FileUtils.getMetaData(collectionDir) == null) {
+        if (getMetaData(collectionDir) == null) {
             FileUtils.saveMetaData(collectionDir, new CollectionMetadata(FileUtils.getNameWithoutExtension(videoFile)));
         }
 
