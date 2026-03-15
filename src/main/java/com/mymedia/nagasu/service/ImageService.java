@@ -13,9 +13,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.List;
@@ -127,7 +127,8 @@ public class ImageService {
 
         var folderCreated = false;
         try {
-            collectionDir.mkdirs();
+            Files.createDirectories(collectionDir.toPath());
+
             folderCreated = true;
 
             var images = request.images();
@@ -154,7 +155,7 @@ public class ImageService {
                         if (FileUtils.isImageFile(f)) {
                             var ext = FileUtils.getExtension(f);
                             var dest = new File(collectionDir, "thumbnail." + ext);
-                            java.nio.file.Files.copy(f.toPath(), dest.toPath());
+                            Files.copy(f.toPath(), dest.toPath());
                             break;
                         }
                     }

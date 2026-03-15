@@ -40,12 +40,11 @@ public class VideoRepository {
                 .filter(f -> FileUtils.getExtension(f).equalsIgnoreCase("vtt"))
                 .map(File::getName)
                 .findFirst();
-        if (vtt.isPresent()) return vtt.get();
-        // Fallback to any subtitle file
-        return Arrays.stream(files)
+        return vtt.orElseGet(() -> Arrays.stream(files)
                 .filter(FileUtils::isSubtitleFile)
                 .map(File::getName)
                 .findFirst()
-                .orElse(null);
+                .orElse(null));
+        // Fallback to any subtitle file
     }
 }
