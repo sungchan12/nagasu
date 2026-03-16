@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -139,11 +140,13 @@ public class VideoService {
         }
         var originalFileName = Path.of(rawFilename).getFileName().toString();
         var baseName = getNameBeforeLastDot(originalFileName);
+        var videoExtension = getExtensionFromName(originalFileName, "mp4");
         var collectionId = SlugUtils.toSlug(baseName);
         if (collectionId.isBlank()) {
             throw new IllegalArgumentException("Invalid filename: cannot generate collection ID");
         }
         SlugUtils.validateCollectionId(collectionId);
+        var slugFileName = collectionId + "." + videoExtension;
 
         var collectionDir = FileUtils.validatePath(videoDir, collectionId);
 
@@ -154,11 +157,11 @@ public class VideoService {
 
         var folderCreated = false;
         try {
-            collectionDir.mkdirs();
+            Files.createDirectories(collectionDir.toPath());
             folderCreated = true;
 
-            // Save video (keep original filename)
-            var videoFile = new File(collectionDir, originalFileName);
+            // Save video with slugified filename
+            var videoFile = new File(collectionDir, slugFileName);
             videoUploadRequestDto.video().transferTo(videoFile);
 
             // Thumbnail processing
@@ -184,12 +187,12 @@ public class VideoService {
                         subtitleInput.getOriginalFilename() != null ? subtitleInput.getOriginalFilename() : "subtitle.srt"
                 ).getFileName().toString();
                 var subtitleExtension = getExtensionFromName(safeSubtitleName, "srt");
-                var subtitleFileName = baseName + "." + subtitleExtension;
+                var subtitleFileName = collectionId + "." + subtitleExtension;
                 var subtitleFile = new File(collectionDir, subtitleFileName);
                 subtitleInput.transferTo(subtitleFile);
 
                 if (!subtitleExtension.equalsIgnoreCase("vtt")) {
-                    var vttFile = new File(collectionDir, baseName + ".vtt");
+                    var vttFile = new File(collectionDir, collectionId + ".vtt");
                     FfmpegUtils.convertToVtt(subtitleFile, vttFile);
                 }
             }
