@@ -36,7 +36,8 @@ public class ImageService {
      */
     public List<ImageCollectionResponse> getCollections(String sort, String order) {
         FileUtils.ensureExists(imagesDir);
-        var list = ImageRepository.getCollectionDirs(imagesDir).stream()
+        var list = ImageRepository
+                .getCollectionDirs(imagesDir).stream()
                 .map(folderName -> {
                     try {
                         var folder = new File(imagesDir, folderName);
@@ -94,6 +95,7 @@ public class ImageService {
         var metadata = FileUtils.getMetaData(collectionDir);
         var imageNames = ImageRepository.getImageFileNames(collectionDir);
         var imageUrls = imageNames.stream()
+                .sorted()
                 .map(name -> "/storage/images/" + collectionId + "/" + name)
                 .toList();
         var thumbnailUrl = getThumbnailUrl(collectionId, collectionDir);
@@ -115,6 +117,7 @@ public class ImageService {
      * Creates a new image collection.
      */
     public String createCollection(ImageUploadDto request) {
+        // validation for creating collection dir.
         logger.info("Images upload started: title={}", request.title());
         FileUtils.ensureExists(imagesDir);
         var collectionId = SlugUtils.toSlug(request.title());
