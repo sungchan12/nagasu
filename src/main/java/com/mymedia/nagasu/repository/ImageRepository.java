@@ -24,6 +24,7 @@ public class ImageRepository {
     public static List<String> getImageFileNames(File dir) {
         return walkFiles(dir)
                 .filter(FileUtils::isImageFile)
+                .filter(f -> !FileUtils.getNameWithoutExtension(f).equalsIgnoreCase("thumbnail"))
                 .map(File::getName)
                 .sorted()
                 .toList();
