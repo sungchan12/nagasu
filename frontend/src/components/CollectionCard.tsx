@@ -21,8 +21,16 @@ export function CollectionCard({ collection, onClick }: CollectionCardProps) {
         <img src={thumbnailUrl} alt={collection.title} />
       </div>
       <div className="card-info">
-        <h3 className="card-title">{collection.title}</h3>
-        <p className="card-artist">{collection.artist}</p>
+        <div className="card-header">
+          <h3 className="card-title">{collection.title}</h3>
+        </div>
+        <div className="card-artist">{collection.artist}</div>
+        <div className="card-meta">
+          <div className="card-meta-row">
+            <span className="card-meta-label">Artist</span>
+            <span className="card-meta-value">{collection.artist}</span>
+          </div>
+        </div>
         <div className="card-tags">
           {collection.tags.map((tag, index) => (
             <span key={index} className="tag">{tag}</span>
