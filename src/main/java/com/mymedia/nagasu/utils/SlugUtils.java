@@ -6,6 +6,8 @@ public class SlugUtils {
 
     public static String toSlug(String title) {
         return title.trim()
+                .replaceAll("\\[.*?]", "")
+                .trim()
                 .replaceAll("\\s+", "_")
                 .replaceAll("[^a-zA-Z0-9가-힣_-]", "");
     }
