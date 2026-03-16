@@ -24,8 +24,20 @@ export function VideoCard({ video, onClick }: VideoCardProps) {
         <div className="play-icon">&#9658;</div>
       </div>
       <div className="video-info">
-        <h3 className="video-title">{video.title}</h3>
-        <p className="video-artist">{video.artist}</p>
+        <div className="video-header">
+          <h3 className="video-title">{video.title}</h3>
+        </div>
+        <div className="video-artist">{video.artist}</div>
+        <div className="video-meta">
+          <div className="video-meta-row">
+            <span className="video-meta-label">Artist</span>
+            <span className="video-meta-value">{video.artist}</span>
+          </div>
+          <div className="video-meta-row">
+            <span className="video-meta-label">Views</span>
+            <span className="video-meta-value">{video.viewCount.toLocaleString()}</span>
+          </div>
+        </div>
         <div className="video-tags">
           {video.tags.map((tag, index) => (
             <span key={index} className="tag">{tag}</span>

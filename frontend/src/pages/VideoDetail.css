@@ -1,80 +1,84 @@
 .video-detail-page {
-  padding: 24px;
-  max-width: 1200px;
+  padding: 32px;
+  max-width: 1600px;
   margin: 0 auto;
 }
 
 .video-detail-page .back-button {
-  margin-bottom: 24px;
-  padding: 8px 16px;
-  font-size: 14px;
-  background-color: #333;
-  color: white;
-  border: none;
-  border-radius: 4px;
+  margin-bottom: 32px;
+  padding: 12px 24px;
+  font-size: 18px;
+  background: none;
+  color: #333;
+  border: 1px solid #ccc;
+  border-radius: 6px;
   cursor: pointer;
 }
 
 .video-detail-page .back-button:hover {
-  background-color: #555;
+  background-color: #f5f5f5;
 }
 
 .video-player-section {
-  margin-bottom: 24px;
+  margin-bottom: 32px;
 }
 
 .video-player {
   width: 100%;
-  max-height: 600px;
+  max-height: 750px;
   background-color: #000;
-  border-radius: 8px;
+  border-radius: 10px;
 }
 
 .video-detail-info {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 20px;
+  padding: 32px;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
 }
 
 .video-detail-info .detail-title {
   margin: 0;
-  font-size: 28px;
+  font-size: 36px;
+  font-weight: 600;
 }
 
 .video-detail-info .detail-artist {
   margin: 0;
-  font-size: 16px;
+  font-size: 22px;
   color: #666;
 }
 
 .video-detail-info .detail-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 10px;
 }
 
 .video-detail-info .tag {
-  padding: 4px 12px;
-  font-size: 12px;
+  padding: 6px 16px;
+  font-size: 18px;
   background-color: #e0e0e0;
-  border-radius: 16px;
+  border-radius: 20px;
 }
 
 .video-detail-info .detail-description {
   margin: 0;
-  font-size: 14px;
+  font-size: 18px;
   color: #444;
   line-height: 1.6;
 }
 
 .video-detail-info .delete-button {
   width: fit-content;
-  padding: 10px 20px;
-  font-size: 14px;
+  padding: 14px 28px;
+  font-size: 18px;
   background-color: #dc3545;
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
 }
 
@@ -88,7 +92,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.6);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -97,39 +101,44 @@
 
 .delete-confirm-dialog {
   background-color: white;
-  padding: 24px;
-  border-radius: 8px;
-  max-width: 400px;
+  padding: 40px;
+  border-radius: 10px;
+  max-width: 500px;
+  width: 90%;
   text-align: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
 .delete-confirm-dialog h2 {
-  margin: 0 0 16px;
+  margin: 0 0 20px;
+  font-size: 26px;
 }
 
 .delete-confirm-dialog p {
-  margin: 0 0 8px;
+  margin: 0 0 12px;
+  font-size: 18px;
 }
 
 .delete-confirm-dialog .warning {
   color: #dc3545;
   font-weight: bold;
+  margin-bottom: 30px;
 }
 
 .dialog-buttons {
   display: flex;
-  gap: 12px;
+  gap: 16px;
   justify-content: center;
-  margin-top: 24px;
+  margin-top: 30px;
 }
 
 .dialog-buttons .cancel-button {
-  padding: 10px 20px;
-  font-size: 14px;
+  padding: 14px 28px;
+  font-size: 18px;
   background-color: #6c757d;
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
 }
 
@@ -138,12 +147,12 @@
 }
 
 .dialog-buttons .confirm-delete-button {
-  padding: 10px 20px;
-  font-size: 14px;
+  padding: 14px 28px;
+  font-size: 18px;
   background-color: #dc3545;
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
 }
 
