@@ -93,4 +93,11 @@ public class ImageController {
         imageService.updateCollectionMetaData(collectionId, imageUpdateRequest);
         return ResponseEntity.ok(new ApiResponse.Success<>("Collection Updated Successfully!"));
     }
+
+    @PostMapping("/{id}/repair")
+    public ResponseEntity<ApiResponse<String>> repairVideoCollection(
+            @PathVariable String id) {
+        imageService.repairImageCollection(id);
+        return ResponseEntity.ok(new ApiResponse.Success<>("Video repaired successfully"));
+    }
 }

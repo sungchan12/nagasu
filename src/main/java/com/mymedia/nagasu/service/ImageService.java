@@ -17,9 +17,13 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.NoSuchElementException;
+
+import static com.mymedia.nagasu.utils.FileUtils.getMetaData;
+import static com.mymedia.nagasu.utils.FileUtils.saveMetaData;
 
 @Service
 public class ImageService {
@@ -42,7 +46,7 @@ public class ImageService {
                     try {
                         var folder = new File(imagesDir, folderName);
                         var thumbnailUrl = getThumbnailUrl(folderName, folder);
-                        var metadata = FileUtils.getMetaData(folder);
+                        var metadata = getMetaData(folder);
 
                         return new ImageCollectionResponse(
                                 folderName,
@@ -92,7 +96,7 @@ public class ImageService {
             throw new NoSuchElementException("Collection not found: " + collectionId);
         }
 
-        var metadata = FileUtils.getMetaData(collectionDir);
+        var metadata = getMetaData(collectionDir);
         var imageNames = ImageRepository.getImageFileNames(collectionDir);
         var imageUrls = imageNames.stream()
                 .sorted()
@@ -219,7 +223,7 @@ public class ImageService {
             throw new NoSuchElementException("Collection not found: " + collectionId);
         }
 
-        var metadata = FileUtils.getMetaData(collectionDir);
+        var metadata = getMetaData(collectionDir);
         if (metadata == null) {
             throw new NoSuchElementException("Metadata not found for collection: " + collectionId);
         }
@@ -275,6 +279,34 @@ public class ImageService {
             }
         }
         logger.info("Added {} images to collection: {}", images.size(), collectionId);
+    }
+
+    public void repairImageCollection(String collectionId) {
+        SlugUtils.validateCollectionId(collectionId);
+        var collectionDir = FileUtils.validatePath(imagesDir, collectionId);
+        if (!collectionDir.exists() || !collectionDir.isDirectory()) {
+            throw new NoSuchElementException("Collection not found: " + collectionId);
+        }
+        if (getMetaData(collectionDir) == null) {
+            saveMetaData(collectionDir, new CollectionMetadata(collectionDir.getName()));
+        }
+        if (ImageRepository.getThumbnailFileName(collectionDir) == null) {
+            var files = collectionDir.listFiles();
+            if (files != null) {
+                for (var file: files) {
+                    if (FileUtils.isImageFile(file)) {
+                        var ext = FileUtils.getExtension(file);
+                        var dest = new File(collectionDir, "thumbnail." + ext);
+                        try {
+                            Files.copy(file.toPath(), dest.toPath());
+                        } catch (IOException e) {
+                            throw new RuntimeException("Failed to repair image collection: " + collectionId, e);
+                        }
+                        break;
+                    }
+                }
+            }
+        }
     }
 
     private static String getExtensionFromName(String filename, String defaultExt) {
