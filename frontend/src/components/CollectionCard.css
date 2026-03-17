@@ -1,24 +1,23 @@
 .collection-card {
   display: flex;
-  gap: 0;
-  border: 1px solid #ddd;
-  border-radius: 6px;
+  flex-direction: column;
   cursor: pointer;
   overflow: hidden;
-  background: #fff;
-  transition: box-shadow 0.2s;
+  border-radius: 4px;
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .collection-card:hover {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
 }
 
 /* Thumbnail */
 .card-thumbnail {
-  flex-shrink: 0;
-  width: 260px;
-  height: 364px;
+  width: 100%;
+  aspect-ratio: 1 / 1;
   background-color: #1a1a1a;
+  overflow: hidden;
 }
 
 .card-thumbnail img {
@@ -30,75 +29,42 @@
 
 /* Info */
 .card-info {
-  flex: 1;
+  background-color: #444;
+  padding: 16px 20px;
   display: flex;
   flex-direction: column;
-  min-width: 0;
-}
-
-/* Header - title bar */
-.card-header {
-  background-color: #f0b0b0;
-  padding: 14px 26px;
+  gap: 4px;
 }
 
 .card-title {
   margin: 0;
-  font-size: 28px;
+  font-size: 20px;
   font-weight: 700;
-  font-style: italic;
-  color: #333;
+  color: #fff;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-/* Artist row */
 .card-artist {
-  padding: 8px 26px;
-  font-size: 22px;
-  color: #555;
-  background-color: #f5d0d0;
-  border-bottom: 1px solid #e8c0c0;
+  font-size: 15px;
+  color: #ccc;
 }
 
-/* Meta info rows */
-.card-meta {
-  padding: 16px 26px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.card-meta-row {
-  display: flex;
-  gap: 30px;
-  font-size: 21px;
-}
-
-.card-meta-label {
-  font-weight: 700;
-  color: #333;
-  min-width: 150px;
-}
-
-.card-meta-value {
-  color: #555;
-}
-
-/* Tags */
 .card-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  padding: 16px 26px;
+  font-size: 14px;
+  color: #aaa;
 }
 
-.tag {
-  padding: 6px 18px;
+.card-heart {
+  margin-top: 6px;
   font-size: 18px;
-  background-color: #e0e0e0;
-  border-radius: 4px;
-  color: #333;
-  white-space: nowrap;
+  color: #999;
+  cursor: pointer;
+  transition: color 0.2s;
+  width: fit-content;
+}
+
+.card-heart:hover {
+  color: #e74c3c;
 }
