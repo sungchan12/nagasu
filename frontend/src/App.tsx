@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Sidebar } from './components/Sidebar';
+import { CommandPalette } from './components/CommandPalette';
 import { CollectionList } from './pages/CollectionList';
 import { CollectionDetail } from './pages/CollectionDetail';
 import { UploadCollection } from './pages/UploadCollection';
@@ -50,8 +51,19 @@ function App() {
     setPage(target);
   };
 
+  const handleCommandNavigate = (page: string, id?: string) => {
+    if (page === 'video-detail' && id) {
+      setSelectedVideoId(id);
+      setPage('video-detail');
+    } else if (page === 'detail' && id) {
+      setSelectedCollectionId(id);
+      setPage('detail');
+    }
+  };
+
   return (
     <div className="app">
+      <CommandPalette onNavigate={handleCommandNavigate} />
       <Sidebar currentPage={page} onNavigate={handleNavigate} />
       <main className="app-content">
         {page === 'detail' && selectedCollectionId && (
