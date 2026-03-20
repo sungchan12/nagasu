@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
@@ -287,24 +288,24 @@ public class ImageService {
         if (!collectionDir.exists() || !collectionDir.isDirectory()) {
             throw new NoSuchElementException("Collection not found: " + collectionId);
         }
+
         if (getMetaData(collectionDir) == null) {
             saveMetaData(collectionDir, new CollectionMetadata(collectionDir.getName()));
         }
+
         if (ImageRepository.getThumbnailFileName(collectionDir) == null) {
             var files = collectionDir.listFiles();
-            if (files != null) {
-                for (var file: files) {
-                    if (FileUtils.isImageFile(file)) {
-                        var ext = FileUtils.getExtension(file);
-                        var dest = new File(collectionDir, "thumbnail." + ext);
-                        try {
-                            Files.copy(file.toPath(), dest.toPath());
-                        } catch (IOException e) {
-                            throw new RuntimeException("Failed to repair image collection: " + collectionId, e);
-                        }
-                        break;
-                    }
+            if (files == null) return;
+            for (File file : files) {
+                if (!FileUtils.isImageFile(file)) continue;
+                var ext = FileUtils.getExtension(file);
+                var thumbNailFile = new File(collectionDir, "thumbnail." + ext);
+                try {
+                    Files.copy(file.toPath(), thumbNailFile.toPath());
+                } catch (IOException e) {
+                    throw new UncheckedIOException("UnCheckedIOException", e);
                 }
+                break;
             }
         }
     }
