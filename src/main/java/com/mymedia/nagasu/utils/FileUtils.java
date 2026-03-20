@@ -75,13 +75,7 @@ public class FileUtils {
     public static void incrementViewCount(File dir) {
         var metadata = getMetaData(dir);
         if (metadata == null) return;
-        saveMetaData(dir, new CollectionMetadata(
-                metadata.title(),
-                metadata.artist(),
-                metadata.tags(),
-                metadata.description(),
-                metadata.viewCount() + 1
-        ));
+        saveMetaData(dir, metadata.viewCountIncrement());
     }
 
     /**
