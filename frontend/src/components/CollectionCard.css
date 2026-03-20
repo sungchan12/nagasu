@@ -3,7 +3,7 @@
   flex-direction: column;
   cursor: pointer;
   overflow: hidden;
-  border-radius: 4px;
+  border-radius: 12px;
   transition: transform 0.2s, box-shadow 0.2s;
 }
 
@@ -30,15 +30,15 @@
 /* Info */
 .card-info {
   background-color: #444;
-  padding: 16px 20px;
+  padding: 10px 14px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 3px;
 }
 
 .card-title {
   margin: 0;
-  font-size: 20px;
+  font-size: 16px;
   font-weight: 700;
   color: #fff;
   overflow: hidden;
@@ -47,12 +47,12 @@
 }
 
 .card-artist {
-  font-size: 15px;
+  font-size: 13px;
   color: #ccc;
 }
 
 .card-tags {
-  font-size: 14px;
+  font-size: 12px;
   color: #aaa;
 }
 
