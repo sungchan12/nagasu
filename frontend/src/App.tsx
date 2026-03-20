@@ -15,6 +15,7 @@ function App() {
   const [page, setPage] = useState<Page>('video-list');
   const [selectedCollectionId, setSelectedCollectionId] = useState<string | null>(null);
   const [selectedVideoId, setSelectedVideoId] = useState<string | null>(null);
+  const [privateMode, setPrivateMode] = useState(false);
 
   const handleSelectCollection = (id: string) => {
     setSelectedCollectionId(id);
@@ -63,7 +64,7 @@ function App() {
 
   return (
     <div className="app">
-      <CommandPalette onNavigate={handleCommandNavigate} />
+      <CommandPalette onNavigate={handleCommandNavigate} onPrivateModeChange={setPrivateMode} />
       <Sidebar currentPage={page} onNavigate={handleNavigate} />
       <main className="app-content">
         {page === 'detail' && selectedCollectionId && (

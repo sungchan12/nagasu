@@ -81,6 +81,7 @@ export function VideoUpload({ onBack, onSuccess }: Props) {
       const response = await fetch(`${API_BASE}/api/videos`, {
         method: 'POST',
         body: formData,
+        credentials: 'include',
       });
 
       const result = await response.json();

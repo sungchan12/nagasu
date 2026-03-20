@@ -8,6 +8,7 @@ type LogEntry = {
 
 type Props = {
   onNavigate?: (page: string, id?: string) => void;
+  onPrivateModeChange?: (active: boolean) => void;
 };
 
 const API_BASE = '/api';
@@ -25,7 +26,7 @@ const HELP_TEXT = `Available commands:
   clear                 Clear log
   exit / Esc            Close palette`;
 
-export function CommandPalette({ onNavigate }: Props) {
+export function CommandPalette({ onNavigate, onPrivateModeChange }: Props) {
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState('');
   const [log, setLog] = useState<LogEntry[]>([]);
@@ -114,7 +115,7 @@ export function CommandPalette({ onNavigate }: Props) {
         : `${API_BASE}/images/${id}/repair`;
       try {
         addLog(`Repairing ${type} "${id}"...`, 'info');
-        const res = await fetch(endpoint, { method: 'POST' });
+        const res = await fetch(endpoint, { method: 'POST', credentials: 'include' });
         if (res.ok) {
           addLog(`${type} "${id}" repaired successfully.`, 'success');
         } else {
@@ -136,7 +137,7 @@ export function CommandPalette({ onNavigate }: Props) {
         : `${API_BASE}/images/${id}`;
       try {
         addLog(`Deleting ${type} "${id}"...`, 'info');
-        const res = await fetch(endpoint, { method: 'DELETE' });
+        const res = await fetch(endpoint, { method: 'DELETE', credentials: 'include' });
         if (res.ok) {
           addLog(`${type} "${id}" deleted.`, 'success');
         } else {
@@ -172,7 +173,7 @@ export function CommandPalette({ onNavigate }: Props) {
         : `${API_BASE}/images`;
       try {
         addLog(`Fetching ${type}...`, 'info');
-        const res = await fetch(endpoint);
+        const res = await fetch(endpoint, { credentials: 'include' });
         if (res.ok) {
           const data = await res.json();
           if (Array.isArray(data) && data.length === 0) {
@@ -193,6 +194,29 @@ export function CommandPalette({ onNavigate }: Props) {
       return;
     }
 
+    // Send unrecognized commands to backend
+    try {
+      const res = await fetch(`${API_BASE}/command`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ command: raw.trim() }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if ('privateMode' in data) {
+          if (data.privateMode) {
+            addLog('Mode changed.', 'success');
+          } else {
+            addLog('Mode restored.', 'info');
+          }
+          onPrivateModeChange?.(data.privateMode);
+          return;
+        }
+      }
+    } catch {
+      // silently ignore
+    }
     addLog(`Unknown command: "${cmd}". Type "help" for available commands.`, 'error');
   };
 

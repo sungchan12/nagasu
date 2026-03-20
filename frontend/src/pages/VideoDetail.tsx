@@ -20,7 +20,7 @@ export function VideoDetail({ videoId, onBack }: Props) {
     const fetchDetails = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`${API_BASE}/api/videos/${videoId}/details`);
+        const response = await fetch(`${API_BASE}/api/videos/${videoId}/details`, { credentials: 'include' });
         if (!response.ok) throw new Error('Failed to fetch details');
         const data = await response.json();
         setDetails(data);
@@ -38,6 +38,7 @@ export function VideoDetail({ videoId, onBack }: Props) {
       setDeleting(true);
       const response = await fetch(`${API_BASE}/api/videos/${videoId}`, {
         method: 'DELETE',
+        credentials: 'include',
       });
 
       if (!response.ok) throw new Error('Failed to delete video');

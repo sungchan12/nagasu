@@ -22,7 +22,7 @@ export function CollectionList({ onSelectCollection, onUploadClick, onVideoClick
     const fetchCollections = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`${API_BASE}/api/images`);
+        const response = await fetch(`${API_BASE}/api/images`, { credentials: 'include' });
         if (!response.ok) throw new Error('Failed to fetch collections');
         const data = await response.json();
         setCollections(data);

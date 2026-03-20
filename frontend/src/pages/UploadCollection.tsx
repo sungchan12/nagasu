@@ -74,6 +74,7 @@ export function UploadCollection({ onBack, onSuccess }: Props) {
       const response = await fetch(`${API_BASE}/api/images`, {
         method: 'POST',
         body: formData,
+        credentials: 'include',
       });
 
       const result = await response.json();

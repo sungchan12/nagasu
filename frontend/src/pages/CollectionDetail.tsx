@@ -33,7 +33,7 @@ export function CollectionDetail({ collectionId, onBack }: Props) {
     const fetchDetails = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`${API_BASE}/api/images/${collectionId}/details`);
+        const response = await fetch(`${API_BASE}/api/images/${collectionId}/details`, { credentials: 'include' });
         if (!response.ok) throw new Error('Failed to fetch details');
         const data = await response.json();
         setDetails(data);
@@ -66,6 +66,7 @@ export function CollectionDetail({ collectionId, onBack }: Props) {
       setDeleting(true);
       const response = await fetch(`${API_BASE}/api/images/${collectionId}`, {
         method: 'DELETE',
+        credentials: 'include',
       });
 
       if (!response.ok) throw new Error('Failed to delete collection');
@@ -123,11 +124,12 @@ export function CollectionDetail({ collectionId, onBack }: Props) {
       const response = await fetch(`${API_BASE}/api/images/${collectionId}`, {
         method: 'PATCH',
         body: formData,
+        credentials: 'include',
       });
       if (!response.ok) throw new Error('Failed to update collection');
 
       // Refresh details
-      const refreshRes = await fetch(`${API_BASE}/api/images/${collectionId}/details`);
+      const refreshRes = await fetch(`${API_BASE}/api/images/${collectionId}/details`, { credentials: 'include' });
       if (refreshRes.ok) {
         setDetails(await refreshRes.json());
       }
@@ -153,10 +155,11 @@ export function CollectionDetail({ collectionId, onBack }: Props) {
       const response = await fetch(`${API_BASE}/api/images/${collectionId}/images`, {
         method: 'POST',
         body: formData,
+        credentials: 'include',
       });
       if (!response.ok) throw new Error('Failed to add images');
 
-      const refreshRes = await fetch(`${API_BASE}/api/images/${collectionId}/details`);
+      const refreshRes = await fetch(`${API_BASE}/api/images/${collectionId}/details`, { credentials: 'include' });
       if (refreshRes.ok) {
         setDetails(await refreshRes.json());
       }

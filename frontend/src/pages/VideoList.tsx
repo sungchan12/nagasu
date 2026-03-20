@@ -28,7 +28,7 @@ export function VideoList({ onSelectVideo, onBack, onUploadClick, sort, order }:
         if (sort) params.set('sort', sort);
         if (order) params.set('order', order);
         const query = params.toString();
-        const response = await fetch(`${API_BASE}/api/videos${query ? `?${query}` : ''}`);
+        const response = await fetch(`${API_BASE}/api/videos${query ? `?${query}` : ''}`, { credentials: 'include' });
         if (!response.ok) throw new Error('Failed to fetch videos');
         const data = await response.json();
         setVideos(data);
