@@ -4,9 +4,11 @@ import com.mymedia.nagasu.dto.ApiResponse;
 import com.mymedia.nagasu.dto.VideoCollectionResponse;
 import com.mymedia.nagasu.dto.VideoDetailsResponse;
 import com.mymedia.nagasu.dto.VideoUploadRequestDto;
+import com.mymedia.nagasu.service.PrivateSessionService;
 import com.mymedia.nagasu.service.VideoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -27,6 +29,7 @@ import java.util.List;
 public class VideoController {
 
     private final VideoService videoService;
+    private final PrivateSessionService privateSessionService;
 
     /**
      * Returns all video collections.
@@ -34,8 +37,10 @@ public class VideoController {
     @GetMapping
     public List<VideoCollectionResponse> getVideos(
             @RequestParam(defaultValue = "title") String sort,
-            @RequestParam(defaultValue = "asc") String order) {
-        return videoService.getVideoCollection(sort, order);
+            @RequestParam(defaultValue = "asc") String order,
+            @CookieValue(value = "_sid", required = false) String sessionToken) {
+        var includePrivate = privateSessionService.isValidSession(sessionToken);
+        return videoService.getVideoCollection(sort, order, includePrivate);
     }
 
     /**
@@ -51,8 +56,10 @@ public class VideoController {
      */
     @PostMapping
     public ResponseEntity<ApiResponse<String>> uploadVideoCollection(
-            @ModelAttribute VideoUploadRequestDto requestDto) {
-        var collectionId = videoService.uploadVideoCollection(requestDto);
+            @ModelAttribute VideoUploadRequestDto requestDto,
+            @CookieValue(value = "_sid", required = false) String sessionToken) {
+        var isPrivate = privateSessionService.isValidSession(sessionToken);
+        var collectionId = videoService.uploadVideoCollection(requestDto, isPrivate);
         return ResponseEntity.ok(new ApiResponse.Success<>(collectionId));
     }
 
