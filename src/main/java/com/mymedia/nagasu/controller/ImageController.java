@@ -6,9 +6,11 @@ import com.mymedia.nagasu.dto.ImageDetailsResponse;
 import com.mymedia.nagasu.dto.ImageUpdateDto;
 import com.mymedia.nagasu.dto.ImageUploadDto;
 import com.mymedia.nagasu.service.ImageService;
+import com.mymedia.nagasu.service.PrivateSessionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -31,6 +33,7 @@ import java.util.List;
 public class ImageController {
 
     private final ImageService imageService;
+    private final PrivateSessionService privateSessionService;
 
     /**
      * Returns all image collections.
@@ -38,8 +41,10 @@ public class ImageController {
     @GetMapping
     public List<ImageCollectionResponse> getCollections(
             @RequestParam(defaultValue = "title") String sort,
-            @RequestParam(defaultValue = "asc") String order) {
-        return imageService.getCollections(sort, order);
+            @RequestParam(defaultValue = "asc") String order,
+            @CookieValue(value = "_sid", required = false) String sessionToken) {
+        var includePrivate = privateSessionService.isValidSession(sessionToken);
+        return imageService.getCollections(sort, order, includePrivate);
     }
 
     /**
@@ -47,8 +52,10 @@ public class ImageController {
      */
     @GetMapping("/{collectionId}/details")
     public ResponseEntity<ImageDetailsResponse> getCollectionDetails(
-            @PathVariable String collectionId) {
-        var details = imageService.getCollectionDetails(collectionId);
+            @PathVariable String collectionId,
+            @CookieValue(value = "_sid", required = false) String sessionToken) {
+        var includePrivate = privateSessionService.isValidSession(sessionToken);
+        var details = imageService.getCollectionDetails(collectionId, includePrivate);
         return ResponseEntity.ok(details);
     }
 
@@ -57,8 +64,10 @@ public class ImageController {
      */
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<String>> createCollection(
-            @ModelAttribute ImageUploadDto requestDto) {
-        var result = imageService.createCollection(requestDto);
+            @ModelAttribute ImageUploadDto requestDto,
+            @CookieValue(value = "_sid", required = false) String sessionToken) {
+        var isPrivate = privateSessionService.isValidSession(sessionToken);
+        var result = imageService.createCollection(requestDto, isPrivate);
         return ResponseEntity.ok(new ApiResponse.Success<>(result));
     }
 
