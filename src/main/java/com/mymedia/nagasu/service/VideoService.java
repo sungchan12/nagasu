@@ -45,7 +45,8 @@ public class VideoService {
                         var folder = new File(videoDir, folderName);
                         var metadata = getMetaData(folder);
 
-                        if (!includePrivate && metadata != null && metadata.isPrivate()) {
+                        var itemIsPrivate = metadata != null && metadata.isPrivate();
+                        if (includePrivate != itemIsPrivate) {
                             return null;
                         }
 
@@ -84,7 +85,7 @@ public class VideoService {
     /**
      * Returns video collection details.
      */
-    public VideoDetailsResponse getVideoCollectionDetails(String collectionId) {
+    public VideoDetailsResponse getVideoCollectionDetails(String collectionId, boolean isPrivate) {
         try {
             SlugUtils.validateCollectionId(collectionId);
             var videoColDir = FileUtils.validatePath(videoDir, collectionId);
@@ -95,6 +96,10 @@ public class VideoService {
             }
 
             var metadata = getMetaData(videoColDir);
+            var collectionIsPrivate = metadata != null && metadata.isPrivate();
+            if (isPrivate != collectionIsPrivate) {
+                throw new NoSuchElementException("Video collection not found: " + collectionId);
+            }
             if (metadata != null) {
                 saveMetaData(videoColDir, metadata.viewCountIncrement());
             }
