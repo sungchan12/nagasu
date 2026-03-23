@@ -37,14 +37,19 @@ public class VideoService {
     /**
      * Returns all video collections.
      */
-    public List<VideoCollectionResponse> getVideoCollection(String sort, String order) {
+    public List<VideoCollectionResponse> getVideoCollection(String sort, String order, boolean includePrivate) {
         FileUtils.ensureExists(videoDir);
         var list = VideoRepository.getVideoCollection(videoDir).stream()
                 .map(folderName -> {
                     try {
                         var folder = new File(videoDir, folderName);
-                        var thumbnailUrl = getThumbnailUrl(folder);
                         var metadata = getMetaData(folder);
+
+                        if (!includePrivate && metadata != null && metadata.isPrivate()) {
+                            return null;
+                        }
+
+                        var thumbnailUrl = getThumbnailUrl(folder);
 
                         return new VideoCollectionResponse(
                                 folderName,
@@ -130,7 +135,7 @@ public class VideoService {
     /**
      * Uploads a video collection.
      */
-    public String uploadVideoCollection(VideoUploadRequestDto videoUploadRequestDto) {
+    public String uploadVideoCollection(VideoUploadRequestDto videoUploadRequestDto, boolean isPrivate) {
         logger.info("Video upload started: title={}", videoUploadRequestDto.title());
         FileUtils.ensureExists(videoDir);
 
@@ -204,7 +209,7 @@ public class VideoService {
                     videoUploadRequestDto.tags(),
                     videoUploadRequestDto.description() != null
                             ? videoUploadRequestDto.description() : ""
-            );
+            ).withPrivate(isPrivate);
             FileUtils.saveMetaData(collectionDir, metadata);
             logger.info("Video upload successful: collectionId={}", collectionId);
             return collectionId;

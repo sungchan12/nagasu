@@ -39,15 +39,20 @@ public class ImageService {
     /**
      * Returns all image collections.
      */
-    public List<ImageCollectionResponse> getCollections(String sort, String order) {
+    public List<ImageCollectionResponse> getCollections(String sort, String order, boolean includePrivate) {
         FileUtils.ensureExists(imagesDir);
         var list = ImageRepository
                 .getCollectionDirs(imagesDir).stream()
                 .map(folderName -> {
                     try {
                         var folder = new File(imagesDir, folderName);
-                        var thumbnailUrl = getThumbnailUrl(folderName, folder);
                         var metadata = getMetaData(folder);
+
+                        if (!includePrivate && metadata != null && metadata.isPrivate()) {
+                            return null;
+                        }
+
+                        var thumbnailUrl = getThumbnailUrl(folderName, folder);
 
                         return new ImageCollectionResponse(
                                 folderName,
@@ -89,7 +94,7 @@ public class ImageService {
     /**
      * Returns image collection details.
      */
-    public ImageDetailsResponse getCollectionDetails(String collectionId) {
+    public ImageDetailsResponse getCollectionDetails(String collectionId, boolean isPrivate) {
         SlugUtils.validateCollectionId(collectionId);
         var collectionDir = FileUtils.validatePath(imagesDir, collectionId);
 
@@ -98,6 +103,11 @@ public class ImageService {
         }
 
         var metadata = getMetaData(collectionDir);
+
+        if (!isPrivate && metadata != null && metadata.isPrivate()) {
+            throw new NoSuchElementException("Collection not found: " + collectionId);
+        }
+
         var imageNames = ImageRepository.getImageFileNames(collectionDir);
         var imageUrls = imageNames.stream()
                 .sorted()
@@ -121,7 +131,7 @@ public class ImageService {
     /**
      * Creates a new image collection.
      */
-    public String createCollection(ImageUploadDto request) {
+    public String createCollection(ImageUploadDto request, boolean isPrivate) {
         // validation for creating collection dir.
         logger.info("Images upload started: title={}", request.title());
         FileUtils.ensureExists(imagesDir);
@@ -175,7 +185,7 @@ public class ImageService {
                     request.artist(),
                     request.tags(),
                     request.description() != null ? request.description() : ""
-            );
+            ).withPrivate(isPrivate);
             FileUtils.saveMetaData(collectionDir, metadata);
             logger.info("Image upload successful: collectionId={}", collectionId);
             return collectionId;
@@ -234,7 +244,8 @@ public class ImageService {
                 request.artist() != null ? request.artist() : metadata.artist(),
                 request.tags() != null ? request.tags() : metadata.tags(),
                 request.description() != null ? request.description() : metadata.description(),
-                metadata.viewCount()
+                metadata.viewCount(),
+                metadata.isPrivate()
         );
         FileUtils.saveMetaData(collectionDir, updated);
 
