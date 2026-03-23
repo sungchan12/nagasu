@@ -48,7 +48,8 @@ public class ImageService {
                         var folder = new File(imagesDir, folderName);
                         var metadata = getMetaData(folder);
 
-                        if (!includePrivate && metadata != null && metadata.isPrivate()) {
+                        var itemIsPrivate = metadata != null && metadata.isPrivate();
+                        if (includePrivate != itemIsPrivate) {
                             return null;
                         }
 
@@ -104,7 +105,8 @@ public class ImageService {
 
         var metadata = getMetaData(collectionDir);
 
-        if (!isPrivate && metadata != null && metadata.isPrivate()) {
+        var collectionIsPrivate = metadata != null && metadata.isPrivate();
+        if (isPrivate != collectionIsPrivate) {
             throw new NoSuchElementException("Collection not found: " + collectionId);
         }
 

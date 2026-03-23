@@ -42,8 +42,9 @@ public class ImageController {
     public List<ImageCollectionResponse> getCollections(
             @RequestParam(defaultValue = "title") String sort,
             @RequestParam(defaultValue = "asc") String order,
+            @RequestParam(name = "private", defaultValue = "false") boolean privateMode,
             @CookieValue(value = "_sid", required = false) String sessionToken) {
-        var includePrivate = privateSessionService.isValidSession(sessionToken);
+        var includePrivate = privateMode && privateSessionService.isValidSession(sessionToken);
         return imageService.getCollections(sort, order, includePrivate);
     }
 
@@ -53,9 +54,10 @@ public class ImageController {
     @GetMapping("/{collectionId}/details")
     public ResponseEntity<ImageDetailsResponse> getCollectionDetails(
             @PathVariable String collectionId,
+            @RequestParam(name = "private", defaultValue = "false") boolean privateMode,
             @CookieValue(value = "_sid", required = false) String sessionToken) {
-        var includePrivate = privateSessionService.isValidSession(sessionToken);
-        var details = imageService.getCollectionDetails(collectionId, includePrivate);
+        var isPrivate = privateMode && privateSessionService.isValidSession(sessionToken);
+        var details = imageService.getCollectionDetails(collectionId, isPrivate);
         return ResponseEntity.ok(details);
     }
 
@@ -65,9 +67,10 @@ public class ImageController {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<String>> createCollection(
             @ModelAttribute ImageUploadDto requestDto,
+            @RequestParam(name = "private", defaultValue = "false") boolean privateMode,
             @CookieValue(value = "_sid", required = false) String sessionToken) {
-        var isPrivate = privateSessionService.isValidSession(sessionToken);
-        var result = imageService.createCollection(requestDto, isPrivate);
+        if (!privateSessionService.isValidSession(sessionToken)) return ResponseEntity.status(401).build();
+        var result = imageService.createCollection(requestDto, privateMode);
         return ResponseEntity.ok(new ApiResponse.Success<>(result));
     }
 
@@ -77,7 +80,9 @@ public class ImageController {
     @PostMapping(value = "/{collectionId}/images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<String>> addCollectionImages(
             @PathVariable String collectionId,
-            @RequestParam("images") List<MultipartFile> images) {
+            @RequestParam("images") List<MultipartFile> images,
+            @CookieValue(value = "_sid", required = false) String sessionToken) {
+        if (!privateSessionService.isValidSession(sessionToken)) return ResponseEntity.status(401).build();
         imageService.addCollectionImages(collectionId, images);
         return ResponseEntity.ok(new ApiResponse.Success<>("Collection added " + images.size() + " images"));
     }
@@ -87,7 +92,9 @@ public class ImageController {
      */
     @DeleteMapping("/{collectionId}")
     public ResponseEntity<ApiResponse<String>> deleteCollection(
-            @PathVariable String collectionId) {
+            @PathVariable String collectionId,
+            @CookieValue(value = "_sid", required = false) String sessionToken) {
+        if (!privateSessionService.isValidSession(sessionToken)) return ResponseEntity.status(401).build();
         imageService.deleteCollection(collectionId);
         return ResponseEntity.ok(new ApiResponse.Success<>("Collection deleted Successfully!"));
     }
@@ -98,14 +105,18 @@ public class ImageController {
     @PatchMapping(value = "/{collectionId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<String>> updateCollection(
             @ModelAttribute ImageUpdateDto imageUpdateRequest,
-            @PathVariable String collectionId) {
+            @PathVariable String collectionId,
+            @CookieValue(value = "_sid", required = false) String sessionToken) {
+        if (!privateSessionService.isValidSession(sessionToken)) return ResponseEntity.status(401).build();
         imageService.updateCollectionMetaData(collectionId, imageUpdateRequest);
         return ResponseEntity.ok(new ApiResponse.Success<>("Collection Updated Successfully!"));
     }
 
     @PostMapping("/{id}/repair")
     public ResponseEntity<ApiResponse<String>> repairVideoCollection(
-            @PathVariable String id) {
+            @PathVariable String id,
+            @CookieValue(value = "_sid", required = false) String sessionToken) {
+        if (!privateSessionService.isValidSession(sessionToken)) return ResponseEntity.status(401).build();
         imageService.repairImageCollection(id);
         return ResponseEntity.ok(new ApiResponse.Success<>("Video repaired successfully"));
     }
