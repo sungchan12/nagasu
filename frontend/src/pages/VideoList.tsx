@@ -7,14 +7,15 @@ import './VideoList.css';
 const API_BASE = '';
 
 type Props = {
-  onSelectVideo: (id: string) => void;
+  onSelectVideo: (id: string, isPrivate?: boolean) => void;
   onBack: () => void;
   onUploadClick: () => void;
   sort?: string;
   order?: string;
+  privateMode?: boolean;
 };
 
-export function VideoList({ onSelectVideo, onBack, onUploadClick, sort, order }: Props) {
+export function VideoList({ onSelectVideo, onBack, onUploadClick, sort, order, privateMode }: Props) {
   const [videos, setVideos] = useState<VideoCollection[]>([]);
   const [filteredVideos, setFilteredVideos] = useState<VideoCollection[]>([]);
   const [loading, setLoading] = useState(true);
@@ -27,6 +28,7 @@ export function VideoList({ onSelectVideo, onBack, onUploadClick, sort, order }:
         const params = new URLSearchParams();
         if (sort) params.set('sort', sort);
         if (order) params.set('order', order);
+        if (privateMode) params.set('private', 'true');
         const query = params.toString();
         const response = await fetch(`${API_BASE}/api/videos${query ? `?${query}` : ''}`, { credentials: 'include' });
         if (!response.ok) throw new Error('Failed to fetch videos');
@@ -60,7 +62,7 @@ export function VideoList({ onSelectVideo, onBack, onUploadClick, sort, order }:
   };
 
   const handleVideoClick = (video: VideoCollection) => {
-    onSelectVideo(video.id);
+    onSelectVideo(video.id, privateMode);
   };
 
   return (

@@ -9,21 +9,24 @@ import { VideoDetail } from './pages/VideoDetail';
 import { VideoUpload } from './pages/VideoUpload';
 import './App.css';
 
-type Page = 'list' | 'detail' | 'upload' | 'video-list' | 'video-detail' | 'video-upload' | 'most-viewed' | 'image-most-viewed';
+type Page = 'list' | 'detail' | 'upload' | 'video-list' | 'video-detail' | 'video-upload' | 'most-viewed' | 'image-most-viewed' | 'private-video-list' | 'private-image-list';
 
 function App() {
   const [page, setPage] = useState<Page>('video-list');
   const [selectedCollectionId, setSelectedCollectionId] = useState<string | null>(null);
   const [selectedVideoId, setSelectedVideoId] = useState<string | null>(null);
   const [privateMode, setPrivateMode] = useState(false);
+  const [selectedIsPrivate, setSelectedIsPrivate] = useState(false);
 
-  const handleSelectCollection = (id: string) => {
+  const handleSelectCollection = (id: string, isPrivate?: boolean) => {
     setSelectedCollectionId(id);
+    setSelectedIsPrivate(isPrivate ?? false);
     setPage('detail');
   };
 
-  const handleSelectVideo = (id: string) => {
+  const handleSelectVideo = (id: string, isPrivate?: boolean) => {
     setSelectedVideoId(id);
+    setSelectedIsPrivate(isPrivate ?? false);
     setPage('video-detail');
   };
 
@@ -65,12 +68,13 @@ function App() {
   return (
     <div className="app">
       <CommandPalette onNavigate={handleCommandNavigate} onPrivateModeChange={setPrivateMode} />
-      <Sidebar currentPage={page} onNavigate={handleNavigate} />
+      <Sidebar currentPage={page} onNavigate={handleNavigate} privateMode={privateMode} />
       <main className="app-content">
         {page === 'detail' && selectedCollectionId && (
           <CollectionDetail
             collectionId={selectedCollectionId}
             onBack={handleBack}
+            privateMode={selectedIsPrivate}
           />
         )}
         {page === 'upload' && (
@@ -105,6 +109,7 @@ function App() {
           <VideoDetail
             videoId={selectedVideoId}
             onBack={handleVideoListBack}
+            privateMode={selectedIsPrivate}
           />
         )}
         {page === 'list' && (
@@ -112,6 +117,22 @@ function App() {
             onSelectCollection={handleSelectCollection}
             onUploadClick={() => setPage('upload')}
             onVideoClick={() => setPage('video-list')}
+          />
+        )}
+        {page === 'private-image-list' && (
+          <CollectionList
+            onSelectCollection={handleSelectCollection}
+            onUploadClick={() => setPage('upload')}
+            onVideoClick={() => setPage('video-list')}
+            privateMode
+          />
+        )}
+        {page === 'private-video-list' && (
+          <VideoList
+            onSelectVideo={handleSelectVideo}
+            onBack={handleBack}
+            onUploadClick={() => setPage('video-upload')}
+            privateMode
           />
         )}
       </main>

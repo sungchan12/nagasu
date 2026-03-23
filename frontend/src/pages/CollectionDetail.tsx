@@ -7,9 +7,10 @@ const API_BASE = '';
 type Props = {
   collectionId: string;
   onBack: () => void;
+  privateMode?: boolean;
 };
 
-export function CollectionDetail({ collectionId, onBack }: Props) {
+export function CollectionDetail({ collectionId, onBack, privateMode }: Props) {
   const [details, setDetails] = useState<ImageDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -33,7 +34,8 @@ export function CollectionDetail({ collectionId, onBack }: Props) {
     const fetchDetails = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`${API_BASE}/api/images/${collectionId}/details`, { credentials: 'include' });
+        const query = privateMode ? '?private=true' : '';
+        const response = await fetch(`${API_BASE}/api/images/${collectionId}/details${query}`, { credentials: 'include' });
         if (!response.ok) throw new Error('Failed to fetch details');
         const data = await response.json();
         setDetails(data);
@@ -129,7 +131,7 @@ export function CollectionDetail({ collectionId, onBack }: Props) {
       if (!response.ok) throw new Error('Failed to update collection');
 
       // Refresh details
-      const refreshRes = await fetch(`${API_BASE}/api/images/${collectionId}/details`, { credentials: 'include' });
+      const refreshRes = await fetch(`${API_BASE}/api/images/${collectionId}/details${privateMode ? '?private=true' : ''}`, { credentials: 'include' });
       if (refreshRes.ok) {
         setDetails(await refreshRes.json());
       }
@@ -159,7 +161,7 @@ export function CollectionDetail({ collectionId, onBack }: Props) {
       });
       if (!response.ok) throw new Error('Failed to add images');
 
-      const refreshRes = await fetch(`${API_BASE}/api/images/${collectionId}/details`, { credentials: 'include' });
+      const refreshRes = await fetch(`${API_BASE}/api/images/${collectionId}/details${privateMode ? '?private=true' : ''}`, { credentials: 'include' });
       if (refreshRes.ok) {
         setDetails(await refreshRes.json());
       }

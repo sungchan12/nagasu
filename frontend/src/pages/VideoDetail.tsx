@@ -7,9 +7,10 @@ const API_BASE = '';
 type Props = {
   videoId: string;
   onBack: () => void;
+  privateMode?: boolean;
 };
 
-export function VideoDetail({ videoId, onBack }: Props) {
+export function VideoDetail({ videoId, onBack, privateMode }: Props) {
   const [details, setDetails] = useState<VideoDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -20,7 +21,8 @@ export function VideoDetail({ videoId, onBack }: Props) {
     const fetchDetails = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`${API_BASE}/api/videos/${videoId}/details`, { credentials: 'include' });
+        const query = privateMode ? '?private=true' : '';
+        const response = await fetch(`${API_BASE}/api/videos/${videoId}/details${query}`, { credentials: 'include' });
         if (!response.ok) throw new Error('Failed to fetch details');
         const data = await response.json();
         setDetails(data);

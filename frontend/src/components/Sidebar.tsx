@@ -1,23 +1,24 @@
 import { useState } from 'react';
 import './Sidebar.css';
 
-type Page = 'list' | 'detail' | 'upload' | 'video-list' | 'video-detail' | 'video-upload' | 'most-viewed' | 'image-most-viewed';
+type Page = 'list' | 'detail' | 'upload' | 'video-list' | 'video-detail' | 'video-upload' | 'most-viewed' | 'image-most-viewed' | 'private-video-list' | 'private-image-list';
 
 type Props = {
   currentPage: Page;
   onNavigate: (page: Page) => void;
+  privateMode: boolean;
 };
 
-export function Sidebar({ currentPage, onNavigate }: Props) {
+export function Sidebar({ currentPage, onNavigate, privateMode }: Props) {
   const [collapsed, setCollapsed] = useState(false);
   const [expandedSection, setExpandedSection] = useState<'videos' | 'images' | null>(() => {
-    if (['video-list', 'video-detail', 'video-upload', 'most-viewed'].includes(currentPage)) return 'videos';
-    if (['list', 'detail', 'upload', 'image-most-viewed'].includes(currentPage)) return 'images';
+    if (['video-list', 'video-detail', 'video-upload', 'most-viewed', 'private-video-list'].includes(currentPage)) return 'videos';
+    if (['list', 'detail', 'upload', 'image-most-viewed', 'private-image-list'].includes(currentPage)) return 'images';
     return null;
   });
 
-  const isVideoPage = ['video-list', 'video-detail', 'video-upload', 'most-viewed'].includes(currentPage);
-  const isImagePage = ['list', 'detail', 'upload', 'image-most-viewed'].includes(currentPage);
+  const isVideoPage = ['video-list', 'video-detail', 'video-upload', 'most-viewed', 'private-video-list'].includes(currentPage);
+  const isImagePage = ['list', 'detail', 'upload', 'image-most-viewed', 'private-image-list'].includes(currentPage);
 
   const toggleSection = (section: 'videos' | 'images') => {
     if (collapsed) {
@@ -75,6 +76,14 @@ export function Sidebar({ currentPage, onNavigate }: Props) {
             >
               Most Viewed
             </button>
+            {privateMode && (
+              <button
+                className={`sidebar-sub-item ${currentPage === 'private-video-list' ? 'active' : ''}`}
+                onClick={() => onNavigate('private-video-list')}
+              >
+                Private
+              </button>
+            )}
           </div>
         )}
       </div>
@@ -115,6 +124,14 @@ export function Sidebar({ currentPage, onNavigate }: Props) {
             >
               Most Viewed
             </button>
+            {privateMode && (
+              <button
+                className={`sidebar-sub-item ${currentPage === 'private-image-list' ? 'active' : ''}`}
+                onClick={() => onNavigate('private-image-list')}
+              >
+                Private
+              </button>
+            )}
           </div>
         )}
       </div>

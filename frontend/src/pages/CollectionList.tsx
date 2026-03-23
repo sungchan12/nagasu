@@ -7,12 +7,13 @@ import './CollectionList.css';
 const API_BASE = '';
 
 type Props = {
-  onSelectCollection: (id: string) => void;
+  onSelectCollection: (id: string, isPrivate?: boolean) => void;
   onUploadClick: () => void;
   onVideoClick: () => void;
+  privateMode?: boolean;
 };
 
-export function CollectionList({ onSelectCollection, onUploadClick, onVideoClick }: Props) {
+export function CollectionList({ onSelectCollection, onUploadClick, onVideoClick, privateMode }: Props) {
   const [collections, setCollections] = useState<ImageCollection[]>([]);
   const [filteredCollections, setFilteredCollections] = useState<ImageCollection[]>([]);
   const [loading, setLoading] = useState(true);
@@ -22,7 +23,10 @@ export function CollectionList({ onSelectCollection, onUploadClick, onVideoClick
     const fetchCollections = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`${API_BASE}/api/images`, { credentials: 'include' });
+        const params = new URLSearchParams();
+        if (privateMode) params.set('private', 'true');
+        const query = params.toString();
+        const response = await fetch(`${API_BASE}/api/images${query ? `?${query}` : ''}`, { credentials: 'include' });
         if (!response.ok) throw new Error('Failed to fetch collections');
         const data = await response.json();
         setCollections(data);
@@ -54,7 +58,7 @@ export function CollectionList({ onSelectCollection, onUploadClick, onVideoClick
   };
 
   const handleCollectionClick = (collection: ImageCollection) => {
-    onSelectCollection(collection.id);
+    onSelectCollection(collection.id, privateMode);
   };
 
   if (loading) return <div className="loading">Loading...</div>;
