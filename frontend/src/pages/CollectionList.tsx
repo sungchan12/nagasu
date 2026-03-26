@@ -11,9 +11,11 @@ type Props = {
   onUploadClick: () => void;
   onVideoClick: () => void;
   privateMode?: boolean;
+   sort?: string;
+  order?: string;
 };
 
-export function CollectionList({ onSelectCollection, onUploadClick, onVideoClick, privateMode }: Props) {
+export function CollectionList({ onSelectCollection, onUploadClick, onVideoClick, privateMode, sort, order }: Props) {
   const [collections, setCollections] = useState<ImageCollection[]>([]);
   const [filteredCollections, setFilteredCollections] = useState<ImageCollection[]>([]);
   const [loading, setLoading] = useState(true);
@@ -25,6 +27,8 @@ export function CollectionList({ onSelectCollection, onUploadClick, onVideoClick
         setLoading(true);
         const params = new URLSearchParams();
         if (privateMode) params.set('private', 'true');
+        if (sort) params.set('sort', sort);
+        if (order) params.set('order', order);
         const query = params.toString();
         const response = await fetch(`${API_BASE}/api/images${query ? `?${query}` : ''}`, { credentials: 'include' });
         if (!response.ok) throw new Error('Failed to fetch collections');
@@ -39,7 +43,7 @@ export function CollectionList({ onSelectCollection, onUploadClick, onVideoClick
     };
 
     fetchCollections();
-  }, []);
+  }, [sort, order, privateMode]);
 
   const handleSearch = (query: string) => {
     if (!query.trim()) {
