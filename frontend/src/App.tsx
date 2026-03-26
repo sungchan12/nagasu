@@ -119,6 +119,15 @@ function App() {
             onVideoClick={() => setPage('video-list')}
           />
         )}
+        {page === 'image-most-viewed' && (
+          <CollectionList
+            onSelectCollection={handleSelectCollection}
+            onUploadClick={() => setPage('upload')}
+            onVideoClick={() => setPage('video-list')}
+            sort="viewCount"
+            order="desc"
+          />
+        )}
         {page === 'private-image-list' && (
           <CollectionList
             onSelectCollection={handleSelectCollection}
