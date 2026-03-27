@@ -88,6 +88,14 @@ public class FileUtils {
     }
 
     /**
+     * Extracts filename without extension from a filename string.
+     */
+    public static String getNameBeforeLastDot(String filename) {
+        int dot = filename.lastIndexOf('.');
+        return dot >= 0 ? filename.substring(0, dot) : filename;
+    }
+
+    /**
      * Prevents Path Traversal by verifying the canonicalized path stays within basePath.
      */
     public static File validatePath(File basePath, String userInput) {
