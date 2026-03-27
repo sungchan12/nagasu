@@ -79,6 +79,15 @@ public class FileUtils {
     }
 
     /**
+     * Extracts file extension from a filename string.
+     * Returns defaultExt if no extension found.
+     */
+    public static String getExtensionFromName(String filename, String defaultExt) {
+        int dot = filename.lastIndexOf('.');
+        return dot >= 0 ? filename.substring(dot + 1) : defaultExt;
+    }
+
+    /**
      * Prevents Path Traversal by verifying the canonicalized path stays within basePath.
      */
     public static File validatePath(File basePath, String userInput) {
