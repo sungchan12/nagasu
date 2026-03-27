@@ -96,6 +96,20 @@ public class FileUtils {
     }
 
     /**
+     * Recursively deletes a file or directory.
+     */
+    public static boolean deleteRecursively(File file) {
+        if (file.isDirectory()) {
+            var children = file.listFiles();
+            if (children != null) {
+                for (var child : children) {
+                    deleteRecursively(child);
+                }
+            }
+        }
+        return file.delete();
+    }
+    /**
      * Prevents Path Traversal by verifying the canonicalized path stays within basePath.
      */
     public static File validatePath(File basePath, String userInput) {
