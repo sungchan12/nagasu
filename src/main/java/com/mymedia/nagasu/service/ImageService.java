@@ -156,7 +156,7 @@ public class ImageService {
                 var file = images.get(i);
                 if (!file.isEmpty()) {
                     var safeName = Path.of(file.getOriginalFilename() != null ? file.getOriginalFilename() : "image.jpg").getFileName().toString();
-                    var extension = getExtensionFromName(safeName, "jpg");
+                    var extension = FileUtils.getExtensionFromName(safeName, "jpg");
                     var fileName = String.format("%03d.%s", i + 1, extension);
                     var imageFile = new File(collectionDir, fileName);
                     file.transferTo(imageFile);
@@ -165,7 +165,7 @@ public class ImageService {
 
             if (request.thumbnail() != null && !request.thumbnail().isEmpty()) {
                 var safeName = Path.of(request.thumbnail().getOriginalFilename() != null ? request.thumbnail().getOriginalFilename() : "thumbnail.jpg").getFileName().toString();
-                var extension = getExtensionFromName(safeName, "jpg");
+                var extension = FileUtils.getExtensionFromName(safeName, "jpg");
                 var thumbnailFile = new File(collectionDir, "thumbnail." + extension);
                 request.thumbnail().transferTo(thumbnailFile);
             } else {
@@ -194,7 +194,7 @@ public class ImageService {
         } catch (Exception e) {
             logger.error("Images upload failed: {} - {}", collectionId, e.getMessage(), e);
             if (folderCreated && collectionDir.exists()) {
-                var deleted = deleteRecursively(collectionDir);
+                var deleted = FileUtils.deleteRecursively(collectionDir);
                 if (deleted) {
                     logger.info("Rollback complete: deleted folder - {}", collectionId);
                 } else {
@@ -216,7 +216,7 @@ public class ImageService {
             throw new NoSuchElementException("Collection not found: " + collectionId);
         }
 
-        var deleted = deleteRecursively(collectionDir);
+        var deleted = FileUtils.deleteRecursively(collectionDir);
         if (!deleted) {
             logger.error("Failed to delete image collection: {}", collectionId);
             throw new IllegalStateException("Failed to delete collection: " + collectionId);
@@ -259,7 +259,7 @@ public class ImageService {
             }
             try {
                 var safeName = request.thumbnail().getOriginalFilename();
-                var extension = safeName != null ? getExtensionFromName(Path.of(safeName).getFileName().toString(), "jpg") : "jpg";
+                var extension = safeName != null ? FileUtils.getExtensionFromName(Path.of(safeName).getFileName().toString(), "jpg") : "jpg";
                 var newThumbnail = new File(collectionDir, "thumbnail." + extension);
                 request.thumbnail().transferTo(newThumbnail);
                 logger.info("Thumbnail updated for collection: {}", collectionId);
@@ -285,7 +285,7 @@ public class ImageService {
             var file = images.get(i);
             try {
                 var safeName = file.getOriginalFilename() != null ? Path.of(file.getOriginalFilename()).getFileName().toString() : null;
-                var extension = safeName != null ? getExtensionFromName(safeName, "jpg") : "jpg";
+                var extension = safeName != null ? FileUtils.getExtensionFromName(safeName, "jpg") : "jpg";
                 var newName = String.format("%03d.%s", existingCount + 1 + i, extension);
                 file.transferTo(new File(collectionDir, newName));
             } catch (IOException e) {
@@ -323,20 +323,4 @@ public class ImageService {
         }
     }
 
-    private static String getExtensionFromName(String filename, String defaultExt) {
-        int dot = filename.lastIndexOf('.');
-        return dot >= 0 ? filename.substring(dot + 1) : defaultExt;
-    }
-
-    private static boolean deleteRecursively(File file) {
-        if (file.isDirectory()) {
-            var children = file.listFiles();
-            if (children != null) {
-                for (var child : children) {
-                    deleteRecursively(child);
-                }
-            }
-        }
-        return file.delete();
-    }
 }
