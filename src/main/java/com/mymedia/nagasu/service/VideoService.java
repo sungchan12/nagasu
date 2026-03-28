@@ -149,8 +149,8 @@ public class VideoService {
             throw new IllegalArgumentException("Filename is missing or blank");
         }
         var originalFileName = Path.of(rawFilename).getFileName().toString();
-        var baseName = getNameBeforeLastDot(originalFileName);
-        var videoExtension = getExtensionFromName(originalFileName, "mp4");
+        var baseName = FileUtils.getNameBeforeLastDot(originalFileName);
+        var videoExtension = FileUtils.getExtensionFromName(originalFileName, "mp4");
         var collectionId = SlugUtils.toSlug(baseName);
         if (collectionId.isBlank()) {
             throw new IllegalArgumentException("Invalid filename: cannot generate collection ID");
@@ -196,7 +196,7 @@ public class VideoService {
                 var safeSubtitleName = Path.of(
                         subtitleInput.getOriginalFilename() != null ? subtitleInput.getOriginalFilename() : "subtitle.srt"
                 ).getFileName().toString();
-                var subtitleExtension = getExtensionFromName(safeSubtitleName, "srt");
+                var subtitleExtension = FileUtils.getExtensionFromName(safeSubtitleName, "srt");
                 var subtitleFileName = collectionId + "." + subtitleExtension;
                 var subtitleFile = new File(collectionDir, subtitleFileName);
                 subtitleInput.transferTo(subtitleFile);
@@ -221,7 +221,7 @@ public class VideoService {
         } catch (Exception e) {
             logger.error("Video upload failed: {} - {}", collectionId, e.getMessage(), e);
             if (folderCreated && collectionDir.exists()) {
-                var deleted = deleteRecursively(collectionDir);
+                var deleted = FileUtils.deleteRecursively(collectionDir);
                 if (deleted) {
                     logger.info("Rollback complete: deleted folder - {}", collectionId);
                 } else {
@@ -244,7 +244,7 @@ public class VideoService {
             throw new NoSuchElementException("Collection not found: " + collectionId);
         }
 
-        var deleted = deleteRecursively(collectionDir);
+        var deleted = FileUtils.deleteRecursively(collectionDir);
         if (!deleted) {
             logger.error("Failed to delete video collection: {}", collectionId);
             throw new IllegalStateException("Failed to delete collection: " + collectionId);
@@ -310,25 +310,4 @@ public class VideoService {
         return "/storage/videos/" + collectionDir.getName() + "/" + subtitleName;
     }
 
-    private static String getNameBeforeLastDot(String filename) {
-        int dot = filename.lastIndexOf('.');
-        return dot >= 0 ? filename.substring(0, dot) : filename;
-    }
-
-    private static String getExtensionFromName(String filename, String defaultExt) {
-        int dot = filename.lastIndexOf('.');
-        return dot >= 0 ? filename.substring(dot + 1) : defaultExt;
-    }
-
-    private static boolean deleteRecursively(File file) {
-        if (file.isDirectory()) {
-            var children = file.listFiles();
-            if (children != null) {
-                for (var child : children) {
-                    deleteRecursively(child);
-                }
-            }
-        }
-        return file.delete();
-    }
 }
