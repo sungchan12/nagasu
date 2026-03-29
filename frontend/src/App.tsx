@@ -7,9 +7,10 @@ import { UploadCollection } from './pages/UploadCollection';
 import { VideoList } from './pages/VideoList';
 import { VideoDetail } from './pages/VideoDetail';
 import { VideoUpload } from './pages/VideoUpload';
+import { MediaBrowser } from './pages/MediaBrowser';
 import './App.css';
 
-type Page = 'list' | 'detail' | 'upload' | 'video-list' | 'video-detail' | 'video-upload' | 'most-viewed' | 'image-most-viewed' | 'private-video-list' | 'private-image-list';
+type Page = 'list' | 'detail' | 'upload' | 'video-list' | 'video-detail' | 'video-upload' | 'most-viewed' | 'image-most-viewed' | 'private-video-list' | 'private-image-list' | 'media-browser';
 
 function App() {
   const [page, setPage] = useState<Page>('video-list');
@@ -70,6 +71,12 @@ function App() {
       <CommandPalette onNavigate={handleCommandNavigate} onPrivateModeChange={setPrivateMode} />
       <Sidebar currentPage={page} onNavigate={handleNavigate} privateMode={privateMode} />
       <main className="app-content">
+        {page === 'media-browser' && (
+          <MediaBrowser
+            onSelectImage={handleSelectCollection}
+            onSelectVideo={handleSelectVideo}
+          />
+        )}
         {page === 'detail' && selectedCollectionId && (
           <CollectionDetail
             collectionId={selectedCollectionId}

@@ -180,7 +180,7 @@ export function CollectionDetail({ collectionId, onBack, privateMode }: Props) {
   return (
     <div className="collection-detail-page">
       <button className="back-button" onClick={onBack}>
-        &larr; Back
+        &#8592; Back
       </button>
 
       <div className="detail-header">
@@ -207,7 +207,9 @@ export function CollectionDetail({ collectionId, onBack, privateMode }: Props) {
               </button>
             </>
           )}
-          <button className="read-button" onClick={() => setViewerIndex(0)}>READ</button>
+          <button className="read-button" onClick={() => setViewerIndex(0)}>
+            <span>View Gallery</span>
+          </button>
         </div>
 
         <div className="detail-info">
@@ -238,7 +240,7 @@ export function CollectionDetail({ collectionId, onBack, privateMode }: Props) {
                 placeholder="Description"
                 rows={3}
               />
-              <p className="detail-count">{details.fileCount} images</p>
+              <p className="detail-count"><strong>{details.fileCount}</strong> images in collection</p>
               <div className="edit-actions">
                 <button className="save-button" onClick={handleSave} disabled={saving}>
                   {saving ? 'Saving...' : 'Save'}
@@ -250,8 +252,10 @@ export function CollectionDetail({ collectionId, onBack, privateMode }: Props) {
             </>
           ) : (
             <>
+              <div className="detail-overline">Gallery</div>
               <h1 className="detail-title">{details.title}</h1>
               <p className="detail-artist">{details.artist}</p>
+              <div className="detail-divider" />
               <div className="detail-tags">
                 {details.tags.map((tag, index) => (
                   <span key={index} className="tag">{tag}</span>
@@ -260,13 +264,13 @@ export function CollectionDetail({ collectionId, onBack, privateMode }: Props) {
               {details.description && (
                 <p className="detail-description">{details.description}</p>
               )}
-              <p className="detail-count">{details.fileCount} images</p>
+              <p className="detail-count"><strong>{details.fileCount}</strong> images in collection</p>
               <div className="detail-actions">
                 <button className="edit-button" onClick={startEditing}>
-                  Edit Collection
+                  Edit
                 </button>
                 <button className="delete-button" onClick={() => setShowDeleteConfirm(true)}>
-                  Delete Collection
+                  Delete
                 </button>
               </div>
             </>
@@ -276,6 +280,7 @@ export function CollectionDetail({ collectionId, onBack, privateMode }: Props) {
 
       <div className="images-section">
         <div className="images-section-header">
+          <span className="images-section-label">Works</span>
           <input
             ref={addImagesInputRef}
             type="file"
@@ -302,8 +307,9 @@ export function CollectionDetail({ collectionId, onBack, privateMode }: Props) {
               <img
                 src={`${API_BASE}${imageUrl}`}
                 alt={`Image ${index + 1}`}
-                loading="lazy"
+                loading={index < 8 ? 'eager' : 'lazy'}
               />
+              <span className="image-item-index">{String(index + 1).padStart(3, '0')}</span>
             </div>
           ))}
         </div>
@@ -316,23 +322,23 @@ export function CollectionDetail({ collectionId, onBack, privateMode }: Props) {
               Gallery Info
             </button>
             <button className="viewer-close" onClick={() => setViewerIndex(null)}>
-              &times;
+              &#215;
             </button>
             <button
               className="viewer-nav viewer-prev"
               onClick={() => setViewerIndex(viewerIndex > 0 ? viewerIndex - 1 : details.images.length - 1)}
             >
-              &larr;
+              &#8592;
             </button>
             <img src={`${API_BASE}${details.images[viewerIndex]}`} alt={`Image ${viewerIndex + 1}`} />
             <button
               className="viewer-nav viewer-next"
               onClick={() => setViewerIndex(viewerIndex < details.images.length - 1 ? viewerIndex + 1 : 0)}
             >
-              &rarr;
+              &#8594;
             </button>
             <div className="viewer-counter">
-              {viewerIndex + 1} / {details.images.length}
+              {String(viewerIndex + 1).padStart(3, '0')} / {String(details.images.length).padStart(3, '0')}
             </div>
           </div>
         </div>
@@ -342,7 +348,7 @@ export function CollectionDetail({ collectionId, onBack, privateMode }: Props) {
         <div className="delete-confirm-overlay" onClick={() => setShowDeleteConfirm(false)}>
           <div className="delete-confirm-dialog" onClick={(e) => e.stopPropagation()}>
             <h2>Delete Collection?</h2>
-            <p>Are you sure you want to delete "{details.title}"?</p>
+            <p>Are you sure you want to delete &ldquo;{details.title}&rdquo;?</p>
             <p className="warning">This action cannot be undone.</p>
             <div className="dialog-buttons">
               <button
