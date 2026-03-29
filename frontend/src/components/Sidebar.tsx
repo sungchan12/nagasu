@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import './Sidebar.css';
 
-type Page = 'list' | 'detail' | 'upload' | 'video-list' | 'video-detail' | 'video-upload' | 'most-viewed' | 'image-most-viewed' | 'private-video-list' | 'private-image-list';
+type Page = 'list' | 'detail' | 'upload' | 'video-list' | 'video-detail' | 'video-upload' | 'most-viewed' | 'image-most-viewed' | 'private-video-list' | 'private-image-list' | 'media-browser';
 
 type Props = {
   currentPage: Page;
@@ -36,6 +36,24 @@ export function Sidebar({ currentPage, onNavigate, privateMode }: Props) {
         {!collapsed && <div className="sidebar-title">Nagasu</div>}
         <button className="sidebar-toggle" onClick={() => setCollapsed(c => !c)}>
           {collapsed ? '›' : '‹'}
+        </button>
+      </div>
+
+      {/* Browse All */}
+      <div className="sidebar-section">
+        <button
+          className={`sidebar-item ${currentPage === 'media-browser' ? 'active' : ''}`}
+          onClick={() => onNavigate('media-browser')}
+          title={collapsed ? 'Browse All' : undefined}
+        >
+          <svg className="sidebar-icon" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="3" width="7" height="7" />
+            <rect x="14" y="3" width="7" height="7" />
+            <rect x="3" y="14" width="7" height="7" />
+            <rect x="14" y="14" width="7" height="7" />
+          </svg>
+          {!collapsed && <span className="sidebar-item-text">Browse All</span>}
+          {collapsed && <span className="sidebar-tooltip">Browse</span>}
         </button>
       </div>
 
