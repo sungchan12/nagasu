@@ -6,7 +6,7 @@ const API_BASE = '';
 
 type Props = {
   videoId: string;
-  onBack: () => void;
+  onBack?: () => void;
   privateMode?: boolean;
 };
 
@@ -16,6 +16,7 @@ export function VideoDetail({ videoId, onBack, privateMode }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [descExpanded, setDescExpanded] = useState(false);
 
   useEffect(() => {
     const fetchDetails = async () => {
@@ -33,7 +34,7 @@ export function VideoDetail({ videoId, onBack, privateMode }: Props) {
       }
     };
     fetchDetails();
-  }, [videoId]);
+  }, [videoId, privateMode]);
 
   const handleDelete = async () => {
     try {
@@ -42,9 +43,7 @@ export function VideoDetail({ videoId, onBack, privateMode }: Props) {
         method: 'DELETE',
         credentials: 'include',
       });
-
       if (!response.ok) throw new Error('Failed to delete video');
-
       onBack();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error');
@@ -54,19 +53,27 @@ export function VideoDetail({ videoId, onBack, privateMode }: Props) {
     }
   };
 
-  if (loading) return <div className="loading">Loading...</div>;
-  if (error) return <div className="error">Error: {error}</div>;
-  if (!details) return <div className="error">Video not found</div>;
+  if (loading) {
+    return (
+      <div className="yt-loading">
+        <div className="yt-spinner" />
+        Loading...
+      </div>
+    );
+  }
+
+  if (error) return <div className="yt-error">{error}</div>;
+  if (!details) return <div className="yt-error">Video not found</div>;
+
+  const artistInitial = details.artist ? details.artist.charAt(0) : '?';
+  const hasDescription = !!details.description?.trim();
+  const hasTags = details.tags && details.tags.length > 0;
 
   return (
     <div className="video-detail-page">
-      <button className="back-button" onClick={onBack}>
-        &larr; Back
-      </button>
-
-      <div className="video-player-section">
+      {/* Video Player */}
+      <div className="yt-player-wrapper">
         <video
-          className="video-player"
           src={`${API_BASE}${details.videoUrl}`}
           controls
           poster={`${API_BASE}${details.thumbnailUrl}`}
@@ -81,38 +88,109 @@ export function VideoDetail({ videoId, onBack, privateMode }: Props) {
         </video>
       </div>
 
-      <div className="video-detail-info">
-        <h1 className="detail-title">{details.title}</h1>
-        <p className="detail-artist">{details.artist}</p>
-        <div className="detail-tags">
-          {details.tags.map((tag, index) => (
-            <span key={index} className="tag">{tag}</span>
-          ))}
-        </div>
-        {details.description && (
-          <p className="detail-description">{details.description}</p>
-        )}
-        <button className="delete-button" onClick={() => setShowDeleteConfirm(true)}>
-          Delete Video
-        </button>
+      {/* Title */}
+      <div className="yt-title-section">
+        <h1 className="yt-title">{details.title}</h1>
       </div>
 
+      {/* Channel Row + Actions */}
+      <div className="yt-channel-row">
+        <div className="yt-channel-info">
+          <div className="yt-channel-avatar">{artistInitial}</div>
+          <span className="yt-channel-name">{details.artist}</span>
+        </div>
+
+        <div className="yt-actions">
+          <button
+            className="yt-action-btn"
+            onClick={() => {
+              if (navigator.share) {
+                navigator.share({ title: details.title, url: window.location.href });
+              } else {
+                navigator.clipboard.writeText(window.location.href);
+              }
+            }}
+          >
+            <svg viewBox="0 0 24 24"><path d="M15 5.63L20.66 12 15 18.37V14h-1c-3.96 0-7.14 1-9.75 3.09 1.84-4.07 5.11-6.4 9.89-7.1l.86-.13V5.63M14 3v6C6.22 10.13 3.11 15.33 2 21c2.78-3.97 6.44-6 12-6v6l8-9-8-9z" /></svg>
+            Share
+          </button>
+
+          <button
+            className="yt-action-btn danger"
+            onClick={() => setShowDeleteConfirm(true)}
+          >
+            <svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" /></svg>
+            Delete
+          </button>
+        </div>
+      </div>
+
+      <hr className="yt-divider" />
+
+      {/* Description Card */}
+      {(hasDescription || hasTags) && (
+        <div
+          className={`yt-description-card${descExpanded ? ' expanded' : ''}`}
+          onClick={() => !descExpanded && setDescExpanded(true)}
+        >
+          {hasTags && (
+            <div className="yt-desc-meta">
+              {details.tags.slice(0, 3).map((tag, i) => (
+                <span key={i}>
+                  {i > 0 && <span className="yt-meta-separator"> &middot; </span>}
+                  #{tag}
+                </span>
+              ))}
+            </div>
+          )}
+
+          {hasDescription && !descExpanded && (
+            <div className="yt-desc-preview">{details.description}</div>
+          )}
+
+          {hasDescription && descExpanded && (
+            <div className="yt-desc-full">{details.description}</div>
+          )}
+
+          {hasTags && descExpanded && (
+            <div className="yt-tags">
+              {details.tags.map((tag, i) => (
+                <span key={i} className="yt-tag">#{tag}</span>
+              ))}
+            </div>
+          )}
+
+          {(hasDescription || (hasTags && details.tags.length > 3)) && (
+            <button
+              className="yt-desc-toggle"
+              onClick={(e) => {
+                e.stopPropagation();
+                setDescExpanded(!descExpanded);
+              }}
+            >
+              {descExpanded ? 'Show less' : '...more'}
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Delete Confirmation Dialog */}
       {showDeleteConfirm && (
-        <div className="delete-confirm-overlay" onClick={() => setShowDeleteConfirm(false)}>
-          <div className="delete-confirm-dialog" onClick={(e) => e.stopPropagation()}>
-            <h2>Delete Video?</h2>
-            <p>Are you sure you want to delete "{details.title}"?</p>
-            <p className="warning">This action cannot be undone.</p>
-            <div className="dialog-buttons">
+        <div className="yt-overlay" onClick={() => setShowDeleteConfirm(false)}>
+          <div className="yt-dialog" onClick={(e) => e.stopPropagation()}>
+            <h3>Delete video?</h3>
+            <p>"{details.title}" will be permanently deleted.</p>
+            <p className="yt-dialog-warn">This action cannot be undone.</p>
+            <div className="yt-dialog-actions">
               <button
-                className="cancel-button"
+                className="yt-dialog-btn secondary"
                 onClick={() => setShowDeleteConfirm(false)}
                 disabled={deleting}
               >
                 Cancel
               </button>
               <button
-                className="confirm-delete-button"
+                className="yt-dialog-btn destructive"
                 onClick={handleDelete}
                 disabled={deleting}
               >
