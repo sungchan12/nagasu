@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Sidebar } from './components/Sidebar';
 import { CommandPalette } from './components/CommandPalette';
 import { CollectionList } from './pages/CollectionList';
@@ -19,50 +19,69 @@ function App() {
   const [privateMode, setPrivateMode] = useState(false);
   const [selectedIsPrivate, setSelectedIsPrivate] = useState(false);
 
+  const navigateTo = useCallback((newPage: Page, state?: { collectionId?: string | null; videoId?: string | null; isPrivate?: boolean }) => {
+    const s = {
+      page: newPage,
+      collectionId: state?.collectionId ?? null,
+      videoId: state?.videoId ?? null,
+      isPrivate: state?.isPrivate ?? false,
+    };
+    history.pushState(s, '', '');
+    setPage(newPage);
+    setSelectedCollectionId(s.collectionId);
+    setSelectedVideoId(s.videoId);
+    setSelectedIsPrivate(s.isPrivate);
+  }, []);
+
+  useEffect(() => {
+    // Set initial state
+    history.replaceState({ page, collectionId: selectedCollectionId, videoId: selectedVideoId, isPrivate: selectedIsPrivate }, '', '');
+
+    const onPopState = (e: PopStateEvent) => {
+      if (e.state) {
+        setPage(e.state.page);
+        setSelectedCollectionId(e.state.collectionId);
+        setSelectedVideoId(e.state.videoId);
+        setSelectedIsPrivate(e.state.isPrivate ?? false);
+      }
+    };
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   const handleSelectCollection = (id: string, isPrivate?: boolean) => {
-    setSelectedCollectionId(id);
-    setSelectedIsPrivate(isPrivate ?? false);
-    setPage('detail');
+    navigateTo('detail', { collectionId: id, isPrivate });
   };
 
   const handleSelectVideo = (id: string, isPrivate?: boolean) => {
-    setSelectedVideoId(id);
-    setSelectedIsPrivate(isPrivate ?? false);
-    setPage('video-detail');
+    navigateTo('video-detail', { videoId: id, isPrivate });
   };
 
   const handleBack = () => {
-    setSelectedCollectionId(null);
-    setSelectedVideoId(null);
-    setPage('list');
+    navigateTo('list');
   };
 
   const handleVideoListBack = () => {
-    setSelectedVideoId(null);
-    setPage('video-list');
+    navigateTo('video-list');
   };
 
   const handleUploadSuccess = () => {
-    setPage('list');
+    navigateTo('list');
   };
 
   const handleVideoUploadSuccess = () => {
-    setPage('video-list');
+    navigateTo('video-list');
   };
 
   const handleNavigate = (target: Page) => {
-    setSelectedCollectionId(null);
-    setSelectedVideoId(null);
-    setPage(target);
+    navigateTo(target);
   };
 
   const handleCommandNavigate = (page: string, id?: string) => {
     if (page === 'video-detail' && id) {
-      setSelectedVideoId(id);
-      setPage('video-detail');
+      navigateTo('video-detail', { videoId: id });
     } else if (page === 'detail' && id) {
-      setSelectedCollectionId(id);
-      setPage('detail');
+      navigateTo('detail', { collectionId: id });
     }
   };
 
