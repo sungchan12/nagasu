@@ -44,7 +44,7 @@ export function VideoDetail({ videoId, onBack, privateMode }: Props) {
         credentials: 'include',
       });
       if (!response.ok) throw new Error('Failed to delete video');
-      onBack();
+      onBack?.();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error');
       setShowDeleteConfirm(false);
