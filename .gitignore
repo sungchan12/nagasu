@@ -67,6 +67,9 @@ $RECYCLE.BIN/
 # Linux
 *~
 
+### Secrets ###
+.env
+
 ### Custom - Media Storage ###
 # 미디어 파일 저장 경로 (로컬 테스트용)
 /storage/
