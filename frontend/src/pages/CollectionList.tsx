@@ -15,7 +15,7 @@ type Props = {
   order?: string;
 };
 
-export function CollectionList({ onSelectCollection, onUploadClick, onVideoClick, privateMode, sort, order }: Props) {
+export function CollectionList({ onSelectCollection, onUploadClick: _onUploadClick, onVideoClick: _onVideoClick, privateMode, sort, order }: Props) {
   const [collections, setCollections] = useState<ImageCollection[]>([]);
   const [filteredCollections, setFilteredCollections] = useState<ImageCollection[]>([]);
   const [loading, setLoading] = useState(true);
