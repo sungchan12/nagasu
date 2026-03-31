@@ -196,7 +196,7 @@ export function CommandPalette({ onNavigate, onPrivateModeChange }: Props) {
 
     // Send unrecognized commands to backend
     try {
-      const res = await fetch(`${API_BASE}/command`, {
+      const res = await fetch(`${API_BASE}/toggle`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
